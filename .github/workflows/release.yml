@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build plugin zip
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Building struijck-agenda ${VERSION}"
+          mkdir -p build/struijck-agenda
+          rsync -a --exclude '.git' \
+                   --exclude '.github' \
+                   --exclude 'build' \
+                   --exclude '*.zip' \
+                   ./ build/struijck-agenda/
+          cd build
+          zip -r ../struijck-agenda.zip struijck-agenda
+          cd ..
+          unzip -l struijck-agenda.zip
+
+      - name: Create / update release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" struijck-agenda.zip --clobber
+          else
+            gh release create "$TAG" struijck-agenda.zip \
+              --title "$TAG" \
+              --generate-notes
+          fi

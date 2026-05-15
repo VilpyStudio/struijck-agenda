@@ -1,0 +1,78 @@
+/* Struijck Agenda - Admin styles */
+
+.struijck-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+.struijck-meta-grid p {
+    margin: 0;
+}
+
+.struijck-meta-grid input[type="date"],
+.struijck-meta-grid input[type="time"] {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+}
+
+.struijck-recurring-options {
+    background: #f6f7f7;
+    border-left: 3px solid #2271b1;
+    padding: 12px 16px;
+    margin-top: 12px;
+    border-radius: 2px;
+}
+
+.struijck-weekdays {
+    margin: 12px 0;
+}
+
+.struijck-weekday-pill {
+    display: inline-block;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.struijck-weekday-pill input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.struijck-weekday-pill span {
+    display: inline-block;
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 999px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.struijck-weekday-pill:hover span {
+    border-color: #2271b1;
+}
+
+.struijck-weekday-pill input:checked + span {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+}
+
+.struijck-recur-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    background: #e7f3ff;
+    color: #2271b1;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.struijck-recur-none {
+    color: #999;
+}

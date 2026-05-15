@@ -1,0 +1,274 @@
+/* ==========================================================================
+   Struijck Agenda — Frontend Weekoverzicht
+   Geïnspireerd op het rooster design (Het rooster).
+   ========================================================================== */
+
+.struijck-agenda {
+    --sa-text: #1a3d3a;
+    --sa-text-soft: #6b7280;
+    --sa-accent: #e8643c;
+    --sa-bg: #ffffff;
+    --sa-bg-soft: #faf3eb;
+    --sa-border: #e5e7eb;
+    --sa-time-color: #1a3d3a;
+    --sa-radius: 16px;
+    --sa-radius-sm: 8px;
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--sa-text);
+    width: 100%;
+    line-height: 1.5;
+}
+
+.struijck-agenda *,
+.struijck-agenda *::before,
+.struijck-agenda *::after {
+    box-sizing: border-box;
+}
+
+.struijck-agenda__loading {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--sa-text-soft);
+}
+
+/* ===== Header / week label ===== */
+.sa-week-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.sa-week-head__left {
+    display: flex;
+    flex-direction: column;
+}
+
+.sa-week-eyebrow {
+    text-transform: uppercase;
+    color: var(--sa-accent);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.sa-week-range {
+    font-size: 1rem;
+    color: var(--sa-text-soft);
+}
+
+.sa-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.sa-nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--sa-border);
+    background: var(--sa-bg);
+    color: var(--sa-text);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+
+.sa-nav-btn:hover {
+    border-color: var(--sa-accent);
+    color: var(--sa-accent);
+}
+
+.sa-nav-today {
+    padding: 0 18px;
+    width: auto;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* ===== Filters (zaal pills) ===== */
+.sa-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.sa-filter-pill {
+    padding: 6px 14px;
+    background: var(--sa-bg);
+    border: 1px solid var(--sa-border);
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--sa-text-soft);
+    font-family: inherit;
+}
+
+.sa-filter-pill:hover {
+    border-color: var(--sa-accent);
+    color: var(--sa-accent);
+}
+
+.sa-filter-pill--active {
+    background: var(--sa-text);
+    color: #fff;
+    border-color: var(--sa-text);
+}
+
+/* ===== Week card ===== */
+.sa-week-card {
+    background: var(--sa-bg);
+    border-radius: var(--sa-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+/* ----- Tabs (dagen) ----- */
+.sa-tabs {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--sa-border);
+    padding: 12px 0 0;
+}
+
+.sa-tab {
+    padding: 14px 8px 16px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--sa-text-soft);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.15s ease;
+    position: relative;
+}
+
+.sa-tab:hover {
+    color: var(--sa-text);
+}
+
+.sa-tab__date {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--sa-text-soft);
+    margin-top: 2px;
+    font-weight: 400;
+}
+
+.sa-tab--active {
+    color: var(--sa-accent);
+    font-weight: 600;
+}
+
+.sa-tab--active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 25%;
+    right: 25%;
+    height: 3px;
+    background: var(--sa-accent);
+    border-radius: 2px;
+}
+
+.sa-tab--today .sa-tab__date {
+    color: var(--sa-accent);
+    font-weight: 600;
+}
+
+/* ----- Day content ----- */
+.sa-day-content {
+    padding: 12px 32px 28px;
+    min-height: 180px;
+}
+
+.sa-day-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 16px;
+    padding: 18px 0;
+    align-items: baseline;
+    border-bottom: 1px solid var(--sa-border);
+}
+
+.sa-day-row:last-child {
+    border-bottom: none;
+}
+
+.sa-day-row__time {
+    font-weight: 700;
+    color: var(--sa-time-color);
+    font-size: 1.25rem;
+    letter-spacing: 0.01em;
+}
+
+.sa-day-row__time-end {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--sa-text-soft);
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+.sa-day-row__title {
+    font-size: 1.05rem;
+    color: var(--sa-text);
+    font-weight: 400;
+}
+
+.sa-day-row__zaal {
+    color: var(--sa-text-soft);
+    font-size: 0.875rem;
+    margin-top: 2px;
+}
+
+.sa-day-empty {
+    padding: 40px 0;
+    text-align: center;
+    color: var(--sa-text-soft);
+    font-size: 0.95rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .sa-tabs {
+        overflow-x: auto;
+        grid-template-columns: repeat(7, minmax(60px, 1fr));
+    }
+
+    .sa-tab {
+        padding: 12px 4px;
+        font-size: 0.85rem;
+    }
+
+    .sa-day-content {
+        padding: 12px 16px 20px;
+    }
+
+    .sa-day-row {
+        grid-template-columns: 80px 1fr;
+        gap: 12px;
+        padding: 14px 0;
+    }
+
+    .sa-day-row__time {
+        font-size: 1.05rem;
+    }
+
+    .sa-day-row__title {
+        font-size: 0.95rem;
+    }
+}
