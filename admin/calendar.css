@@ -691,28 +691,55 @@
         width: 100%;
     }
 
-    /* The 7-day grid can't shrink to phone width, so let it scroll
-       horizontally while the toolbar/legend stay put. */
+    /* Compacte maand-weergave zoals een telefoon-agenda: past op de
+       schermbreedte, boekingen als gekleurde stipjes. Tik op een dag
+       voor de lijst (opent de dag-modal). */
     .sc-grid-scroll {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow: visible;
     }
     .sc-grid {
-        min-width: 820px;
+        min-width: 0;
     }
     .sc-day {
-        min-height: 96px;
-        padding: 6px 6px 30px;
+        min-height: 56px;
+        padding: 4px 2px 6px;
+        cursor: pointer;
+    }
+    .sc-day__number {
+        font-size: 12px;
+        text-align: center;
+        margin: 0 0 3px;
+    }
+    .sc-day--today .sc-day__number {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+        margin: 0 auto 3px;
+    }
+    .sc-day__add {
+        display: none;
+    }
+    .sc-day__events {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 3px;
     }
     .sc-event {
-        font-size: 10px;
-        padding: 3px 5px;
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0;
+        line-height: 0;
+        overflow: hidden;
+        text-indent: -9999px;
+        white-space: normal;
     }
-    /* Touch devices have no hover, so always show the add button. */
-    .sc-day__add {
-        opacity: 1;
-        width: 28px;
-        height: 28px;
+    .sc-event__time,
+    .sc-event__repeat {
+        display: none;
     }
 
     /* Booking modal as a full-width bottom sheet. */
