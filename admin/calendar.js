@@ -258,7 +258,12 @@
 
         html += '<div class="sc-form__row">';
         html += '  <label class="sc-form__label">' + esc(i18n.title) + ' *</label>';
-        html += '  <input type="text" class="sc-form__input" name="title" value="' + esc(data.title || '') + '" required autofocus placeholder="Bijv. Volleybalvereniging Zaan">';
+        html += '  <input type="text" class="sc-form__input" name="title" value="' + esc(data.title || '') + '" required autofocus placeholder="Kies of typ een huurder…" list="sc-huurder-list" autocomplete="off">';
+        html += '  <datalist id="sc-huurder-list">';
+        (cfg.huurders || []).forEach(function(h) {
+            html += '<option value="' + esc(h) + '"></option>';
+        });
+        html += '  </datalist>';
         html += '</div>';
 
         html += '<div class="sc-form__row">';
@@ -278,9 +283,9 @@
 
         html += '<div class="sc-form__row sc-form__row--split">';
         html += '  <div><label class="sc-form__label">' + esc(i18n.startTime) + ' *</label>';
-        html += '    <input type="time" class="sc-form__input" name="start_time" value="' + esc(data.start_time || '') + '" required></div>';
+        html += '    <select class="sc-form__select" name="start_time" required>' + timeOptions(data.start_time) + '</select></div>';
         html += '  <div><label class="sc-form__label">' + esc(i18n.endTime) + '</label>';
-        html += '    <input type="time" class="sc-form__input" name="end_time" value="' + esc(data.end_time || '') + '"></div>';
+        html += '    <select class="sc-form__select" name="end_time">' + timeOptions(data.end_time) + '</select></div>';
         html += '</div>';
 
         html += '<div class="sc-form__row">';
@@ -433,6 +438,27 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+    // Build <option>s in 30-min steps from 06:00 to 23:30. Any pre-existing
+    // value outside the grid (e.g. a legacy 20:47) stays selectable so editing
+    // an old booking never silently loses its time.
+    var TIME_START_MIN = 6 * 60;
+    var TIME_END_MIN = 23 * 60 + 30;
+    function timeOptions(selected) {
+        var sel = (selected || '').substring(0, 5);
+        var out = '<option value="">—</option>';
+        var found = false;
+        for (var mins = TIME_START_MIN; mins <= TIME_END_MIN; mins += 30) {
+            var h = Math.floor(mins / 60), m = mins % 60;
+            var v = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+            var isSel = v === sel;
+            if (isSel) found = true;
+            out += '<option value="' + v + '"' + (isSel ? ' selected' : '') + '>' + v + '</option>';
+        }
+        if (sel && !found) {
+            out += '<option value="' + esc(sel) + '" selected>' + esc(sel) + ' (overig)</option>';
+        }
+        return out;
     }
     function ymd(d) {
         var m = d.getMonth() + 1, day = d.getDate();

@@ -1,6 +1,6 @@
 # Struijck Agenda
 
-Custom WordPress plugin voor agendabeheer van sporthal De Struijck. Gemaakt voor zaanhaven.nl.
+Custom WordPress plugin voor agendabeheer van sporthal De Struijck. Door Studio Vilpy.
 
 ## Wat doet het?
 
@@ -72,7 +72,7 @@ Opties:
 ### 4. iCal-feed
 Externe kalender-apps kunnen de feed importeren:
 ```
-https://zaanhaven.nl/?struijck_ical=feed
+https://jouw-website.nl/?struijck_ical=feed
 ```
 
 ## Styling aanpassen

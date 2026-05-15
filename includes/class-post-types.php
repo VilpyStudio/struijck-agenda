@@ -77,5 +77,27 @@ class Struijck_Agenda_Post_Types {
         );
 
         register_taxonomy( 'struijck_zaal', array( 'struijck_activiteit' ), $args );
+
+        $huurder_labels = array(
+            'name'          => __( 'Huurders', 'struijck-agenda' ),
+            'singular_name' => __( 'Huurder', 'struijck-agenda' ),
+            'search_items'  => __( 'Zoek huurders', 'struijck-agenda' ),
+            'all_items'     => __( 'Alle huurders', 'struijck-agenda' ),
+            'edit_item'     => __( 'Huurder bewerken', 'struijck-agenda' ),
+            'update_item'   => __( 'Huurder bijwerken', 'struijck-agenda' ),
+            'add_new_item'  => __( 'Nieuwe huurder toevoegen', 'struijck-agenda' ),
+            'new_item_name' => __( 'Naam nieuwe huurder', 'struijck-agenda' ),
+            'menu_name'     => __( 'Huurders', 'struijck-agenda' ),
+        );
+
+        register_taxonomy( 'struijck_huurder', array( 'struijck_activiteit' ), array(
+            'hierarchical'      => false,
+            'labels'            => $huurder_labels,
+            'show_ui'           => true,
+            'show_admin_column' => true,
+            'show_in_rest'      => true,
+            'query_var'         => true,
+            'rewrite'           => array( 'slug' => 'huurder' ),
+        ) );
     }
 }

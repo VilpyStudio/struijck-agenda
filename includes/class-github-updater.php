@@ -149,7 +149,7 @@ class Struijck_Agenda_GitHub_Updater {
             'name'          => 'Struijck Agenda',
             'slug'          => self::plugin_slug(),
             'version'       => $release['version'],
-            'author'        => 'Bas / Zaanhaven',
+            'author'        => 'Studio Vilpy',
             'homepage'      => $release['html_url'],
             'download_link' => $release['package'],
             'sections'      => array(

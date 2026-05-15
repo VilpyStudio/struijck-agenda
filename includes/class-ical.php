@@ -70,7 +70,7 @@ class Struijck_Agenda_ICal {
 
         return array(
             'BEGIN:VEVENT',
-            'UID:' . $occ['id'] . '-' . $occ['date'] . '@zaanhaven.nl',
+            'UID:' . $occ['id'] . '-' . $occ['date'] . '@' . self::uid_domain(),
             'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
             'DTSTART:' . $start_dt,
             'DTEND:' . $end_dt,
@@ -90,7 +90,7 @@ class Struijck_Agenda_ICal {
 
         $event = array(
             'BEGIN:VEVENT',
-            'UID:' . $post->ID . '@zaanhaven.nl',
+            'UID:' . $post->ID . '@' . self::uid_domain(),
             'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
             'DTSTART:' . $start,
             'DTEND:' . $end,
@@ -152,6 +152,15 @@ class Struijck_Agenda_ICal {
         }
         $ts = strtotime( $date . ' ' . $time );
         return gmdate( 'Ymd\THis', $ts );
+    }
+
+    /**
+     * Domain used for iCal UIDs. Derived from the site's own URL so UIDs are
+     * stable per install and never hardcode a specific domain.
+     */
+    protected static function uid_domain() {
+        $host = wp_parse_url( home_url(), PHP_URL_HOST );
+        return $host ? $host : 'struijck-agenda.local';
     }
 
     protected static function escape_text( $text ) {

@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Struijck Agenda
- * Plugin URI:  https://zaanhaven.nl
+ * Plugin URI:  https://github.com/VilpyStudio/struijck-agenda
  * Description: Agenda- en activiteitenbeheer voor sporthal De Struijck. Beheer activiteiten per zaal, met ondersteuning voor terugkerende afspraken, en toon de agenda op de site via shortcode of Elementor widget.
- * Version:     1.2.1
- * Author:      Bas / Zaanhaven
- * Author URI:  https://zaanhaven.nl
+ * Version:     1.3.0
+ * Author:      Studio Vilpy
+ * Author URI:  https://github.com/VilpyStudio
  * License:     GPL-2.0+
  * Text Domain: struijck-agenda
  * Domain Path: /languages
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'STRUIJCK_AGENDA_VERSION', '1.2.1' );
+define( 'STRUIJCK_AGENDA_VERSION', '1.3.0' );
 define( 'STRUIJCK_AGENDA_FILE', __FILE__ );
 define( 'STRUIJCK_AGENDA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'STRUIJCK_AGENDA_URL', plugin_dir_url( __FILE__ ) );

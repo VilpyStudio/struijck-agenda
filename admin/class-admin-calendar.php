@@ -61,10 +61,21 @@ class Struijck_Agenda_Admin_Calendar {
             }
         }
 
+        // Get huurders (renters) for the autocomplete list.
+        $huurder_terms = get_terms( array( 'taxonomy' => 'struijck_huurder', 'hide_empty' => false ) );
+        $huurders      = array();
+        if ( ! is_wp_error( $huurder_terms ) ) {
+            foreach ( $huurder_terms as $t ) {
+                $huurders[] = $t->name;
+            }
+            sort( $huurders );
+        }
+
         wp_localize_script( 'struijck-admin-calendar', 'StruijckCalendar', array(
             'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'struijck_calendar' ),
             'zalen'    => $zalen,
+            'huurders' => $huurders,
             'newZaalUrl' => admin_url( 'edit-tags.php?taxonomy=struijck_zaal&post_type=struijck_activiteit' ),
             'i18n'     => array(
                 'months'        => array( 'januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december' ),
@@ -197,6 +208,10 @@ class Struijck_Agenda_Admin_Calendar {
         } else {
             wp_set_object_terms( $post_id, array(), 'struijck_zaal' );
         }
+
+        // Huurder vastleggen als term, zodat de naam in de keuzelijst komt
+        // en niet telkens opnieuw getypt hoeft te worden.
+        wp_set_object_terms( $post_id, $title, 'struijck_huurder', false );
 
         wp_send_json_success( array( 'id' => $post_id ) );
     }
