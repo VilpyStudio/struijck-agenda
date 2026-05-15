@@ -31,16 +31,22 @@
     box-sizing: border-box;
 }
 
-/* Neutralise the host theme's global button styling so the agenda always
-   renders with its own design (themes often force a coloured button). */
-.struijck-agenda button {
+/* Neutralise the host theme's button styling — including hover/focus/active,
+   which themes often colour. Higher specificity than a bare `button:hover`
+   so the theme can't bleed through (the orange blob). */
+.struijck-agenda button,
+.struijck-agenda button:hover,
+.struijck-agenda button:focus,
+.struijck-agenda button:active {
     -webkit-appearance: none;
     appearance: none;
     margin: 0;
     padding: 0;
     background: none;
+    background-color: transparent;
     border: none;
     box-shadow: none;
+    outline: none;
     font: inherit;
     color: inherit;
     text-align: inherit;
@@ -50,6 +56,7 @@
     border-radius: 0;
     cursor: pointer;
     width: auto;
+    transition: none;
 }
 
 .struijck-agenda :focus-visible {
@@ -97,37 +104,39 @@
 .sa-head-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
-/* View switcher (Week / Maand / Lijst) */
+/* View switcher + nav share a pill style. Selectors are prefixed with
+   .struijck-agenda so they always outrank a theme's `button` rules. */
 .sa-views {
     display: inline-flex;
-    background: var(--sa-bg-soft);
-    border: 1px solid var(--sa-border);
-    border-radius: var(--sa-radius-sm);
-    padding: 3px;
+    gap: 6px;
 }
 
-.sa-view-btn {
-    padding: 7px 16px;
+.struijck-agenda .sa-view-btn {
+    padding: 8px 16px;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--sa-text-soft);
-    border-radius: var(--sa-radius-sm);
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.sa-view-btn:hover {
-    color: var(--sa-text);
-}
-
-.sa-view-btn--active,
-.sa-view-btn--active:hover {
     background: var(--sa-bg);
+    border: 1px solid var(--sa-border);
+    border-radius: var(--sa-radius-sm);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.struijck-agenda .sa-view-btn:hover {
     color: var(--sa-accent);
-    box-shadow: 0 1px 2px rgba(26, 61, 58, 0.08);
+    border-color: var(--sa-accent);
+    background: var(--sa-accent-soft);
+}
+
+.struijck-agenda .sa-view-btn--active,
+.struijck-agenda .sa-view-btn--active:hover {
+    background: var(--sa-text);
+    color: #fff;
+    border-color: var(--sa-text);
 }
 
 .sa-nav {
@@ -135,33 +144,29 @@
     gap: 8px;
 }
 
-.sa-nav-btn {
+.struijck-agenda .sa-nav-btn {
     height: 42px;
     min-width: 42px;
-    padding: 0 12px;
+    padding: 0 14px;
     border-radius: var(--sa-radius-sm);
     border: 1px solid var(--sa-border);
     background: var(--sa-bg);
     color: var(--sa-text);
     font-size: 1.05rem;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
 }
 
-.sa-nav-btn:hover {
+.struijck-agenda .sa-nav-btn:hover {
     border-color: var(--sa-accent);
     color: var(--sa-accent);
     background: var(--sa-accent-soft);
 }
 
-.sa-nav-btn:active {
-    transform: translateY(1px);
-}
-
-.sa-nav-today {
+.struijck-agenda .sa-nav-today {
     font-size: 0.9rem;
     font-weight: 600;
 }
@@ -174,7 +179,7 @@
     margin-bottom: 20px;
 }
 
-.sa-filter-pill {
+.struijck-agenda .sa-filter-pill {
     padding: 8px 16px;
     background: var(--sa-bg);
     border: 1px solid var(--sa-border);
@@ -185,14 +190,14 @@
     line-height: 1.2;
 }
 
-.sa-filter-pill:hover {
+.struijck-agenda .sa-filter-pill:hover {
     border-color: var(--sa-accent);
     color: var(--sa-accent);
     background: var(--sa-accent-soft);
 }
 
-.sa-filter-pill--active,
-.sa-filter-pill--active:hover {
+.struijck-agenda .sa-filter-pill--active,
+.struijck-agenda .sa-filter-pill--active:hover {
     background: var(--sa-text);
     color: #fff;
     border-color: var(--sa-text);
@@ -207,14 +212,14 @@
     overflow: hidden;
 }
 
-/* ----- Week: day tabs ----- */
+/* ----- Week: day tabs (desktop) ----- */
 .sa-tabs {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     border-bottom: 1px solid var(--sa-border);
 }
 
-.sa-tab {
+.struijck-agenda .sa-tab {
     padding: 16px 6px 18px;
     text-align: center;
     color: var(--sa-text-soft);
@@ -224,7 +229,7 @@
     position: relative;
 }
 
-.sa-tab:hover {
+.struijck-agenda .sa-tab:hover {
     color: var(--sa-text);
 }
 
@@ -236,7 +241,7 @@
     font-weight: 500;
 }
 
-.sa-tab--active {
+.struijck-agenda .sa-tab--active {
     color: var(--sa-accent);
 }
 
@@ -260,7 +265,7 @@
     font-weight: 700;
 }
 
-/* ----- Day content (week + list rows) ----- */
+/* ----- Rows (week active day, list, mobile week) ----- */
 .sa-day-content {
     padding: 8px 32px 24px;
     min-height: 200px;
@@ -336,6 +341,43 @@
 }
 
 .sa-list .sa-day-row__time {
+    font-size: 1.1rem;
+}
+
+/* ----- Mobile week agenda (hidden on desktop) ----- */
+.sa-week-agenda {
+    display: none;
+    padding: 4px 22px 22px;
+}
+
+.sa-wa-date {
+    text-transform: capitalize;
+    font-weight: 700;
+    color: var(--sa-text);
+    font-size: 1rem;
+    padding: 20px 0 6px;
+    border-bottom: 2px solid var(--sa-accent);
+    margin-bottom: 2px;
+}
+
+.sa-wa-day--today .sa-wa-date {
+    color: var(--sa-accent);
+}
+
+.sa-wa-empty {
+    padding: 12px 0;
+    color: var(--sa-text-soft);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--sa-border);
+}
+
+.sa-week-agenda .sa-day-row {
+    grid-template-columns: 78px 1fr;
+    gap: 14px;
+    padding: 14px 0;
+}
+
+.sa-week-agenda .sa-day-row__time {
     font-size: 1.1rem;
 }
 
@@ -423,7 +465,7 @@
     font-weight: 600;
 }
 
-/* ===== Responsive ===== */
+/* ===== Responsive — geen side-scroll ===== */
 @media (max-width: 768px) {
     .sa-week-head {
         align-items: flex-start;
@@ -435,87 +477,98 @@
     }
     .sa-views {
         flex: 1;
-        justify-content: space-between;
     }
-    .sa-view-btn {
+    .struijck-agenda .sa-view-btn {
         flex: 1;
         text-align: center;
-        padding: 9px 8px;
-    }
-    .sa-nav {
-        flex-shrink: 0;
+        padding: 10px 6px;
     }
 
     .sa-filters {
         gap: 6px;
         margin-bottom: 16px;
     }
-    .sa-filter-pill {
+    .struijck-agenda .sa-filter-pill {
         padding: 9px 15px;
     }
 
-    /* Day tabs as a snap-scrolling strip. */
-    .sa-tabs {
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-    .sa-tabs::-webkit-scrollbar {
+    /* WEEK: tabs verbergen, hele week verticaal tonen. */
+    .sa-tabs,
+    .sa-day-content {
         display: none;
     }
-    .sa-tab {
-        flex: 0 0 22%;
-        min-width: 76px;
-        scroll-snap-align: center;
-        padding: 14px 6px 16px;
+    .sa-week-agenda {
+        display: block;
     }
 
-    .sa-day-content,
+    /* LIST blijft verticaal. */
     .sa-list {
-        padding: 6px 18px 22px;
-        min-height: 0;
+        padding: 4px 18px 20px;
     }
     .sa-day-row,
-    .sa-list .sa-day-row {
-        grid-template-columns: 78px 1fr;
+    .sa-list .sa-day-row,
+    .sa-week-agenda .sa-day-row {
+        grid-template-columns: 72px 1fr;
         gap: 14px;
-        padding: 16px 0;
+        padding: 14px 0;
     }
     .sa-day-row__time {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
     }
     .sa-day-row__title {
         font-size: 1rem;
     }
-    .sa-day-empty {
-        padding: 40px 0;
-    }
 
-    /* Month: scroll horizontally so the 7 columns stay tappable. */
-    .sa-week-card {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    .sa-month__head,
-    .sa-month {
-        min-width: 680px;
+    /* MAAND: past op schermbreedte, boekingen als stipjes (geen scroll). */
+    .sa-month__hcell {
+        padding: 8px 2px;
+        font-size: 0.62rem;
     }
     .sa-mday {
-        min-height: 92px;
+        min-height: 64px;
+        padding: 5px 3px;
+        gap: 3px;
+        align-items: center;
+    }
+    .sa-mday__num {
+        font-size: 0.8rem;
+        text-align: center;
+    }
+    .sa-mday--today .sa-mday__num {
+        width: 22px;
+        height: 22px;
+        margin: 0 auto;
+    }
+    .sa-mevent {
+        width: 7px;
+        height: 7px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: var(--sa-accent);
+        font-size: 0;
+        line-height: 0;
+        text-indent: -9999px;
+        overflow: hidden;
+    }
+    .sa-mday {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .sa-mday__num {
+        flex: 0 0 100%;
+    }
+    .sa-mmore {
+        display: none;
     }
 }
 
-@media (max-width: 480px) {
-    .sa-tab {
-        flex-basis: 28%;
-        min-width: 70px;
-        font-size: 0.9rem;
-    }
+@media (max-width: 420px) {
     .sa-day-row,
-    .sa-list .sa-day-row {
-        grid-template-columns: 64px 1fr;
+    .sa-list .sa-day-row,
+    .sa-week-agenda .sa-day-row {
+        grid-template-columns: 62px 1fr;
         gap: 12px;
     }
     .sa-day-row__time {

@@ -201,11 +201,34 @@
                  esc(this.i18n.weekdaysShort[i]) +
                  '<span class="sa-tab__date">' + d.getDate() + ' ' + esc(m[d.getMonth()].substring(0, 3)) + '</span></button>';
         }
-        h += '</div><div class="sa-day-content">';
+        h += '</div>';
+
+        // Desktop: alleen de actieve dag.
+        h += '<div class="sa-day-content">';
         var ev = this.eventsOn(ymd(this.addDays(ws, this.activeDayOffset)));
         if (!ev.length) h += '<div class="sa-day-empty">' + esc(this.i18n.noEvents) + '</div>';
         else ev.forEach(function(e) { h += this.rowHtml(e); }, this);
-        return h + '</div>';
+        h += '</div>';
+
+        // Mobiel: hele week verticaal (geen tabs, geen side-scroll).
+        var wl = this.i18n.weekdaysLong;
+        h += '<div class="sa-week-agenda">';
+        for (var j = 0; j < 7; j++) {
+            var wd = this.addDays(ws, j), wdStr = ymd(wd);
+            var dayEv = this.eventsOn(wdStr);
+            var dc = 'sa-wa-day' + (wdStr === todayStr ? ' sa-wa-day--today' : '');
+            h += '<div class="' + dc + '">';
+            h += '<div class="sa-wa-date">' + esc(wl[j]) + ' ' + wd.getDate() + ' ' + esc(m[wd.getMonth()]) + '</div>';
+            if (!dayEv.length) {
+                h += '<div class="sa-wa-empty">' + esc(this.i18n.noEvents) + '</div>';
+            } else {
+                dayEv.forEach(function(e) { h += this.rowHtml(e); }, this);
+            }
+            h += '</div>';
+        }
+        h += '</div>';
+
+        return h;
     };
 
     /* ---------- month ---------- */
