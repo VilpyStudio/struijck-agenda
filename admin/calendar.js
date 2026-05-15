@@ -49,7 +49,6 @@
         (cfg.zalen || []).forEach(function(z) {
             html += '<span class="sc-legend__item"><span class="sc-legend__swatch" style="background:' + esc(z.color) + '"></span>' + esc(z.name) + (z.allowDouble ? ' <em>(dubbel mogelijk)</em>' : '') + '</span>';
         });
-        html += '<span class="sc-legend__item"><span class="sc-legend__swatch" style="background:#9ca3af"></span>Geen zaal</span>';
         html += '<span class="sc-legend__item sc-legend__item--note">↻ = wekelijks terugkerend</span>';
         html += '</div>';
 

@@ -10,37 +10,69 @@
     --sc-accent: #e8643c;
     --sc-accent-dark: #cf4f2a;
     --sc-accent-soft: #fbe8e1;
-    --sc-border: #e7ded2;
-    --sc-radius: 14px;
-    --sc-radius-sm: 9px;
+    --sc-border: #ece3d6;
+    --sc-radius: 16px;
+    --sc-radius-sm: 10px;
 }
 
+/* The whole planner sits on a cream surface, like the public rooster. */
 .struijck-cal-wrap {
-    max-width: 1400px;
+    max-width: 1320px;
+    margin: 20px 20px 0 0;
+    padding: 36px 40px 48px;
+    background: var(--sc-cream);
+    border-radius: var(--sc-radius);
     color: var(--sc-text);
 }
 
-.struijck-cal-pagetitle,
+.sc-pagehead {
+    margin-bottom: 28px;
+}
+
+.sc-eyebrow {
+    display: block;
+    text-transform: uppercase;
+    color: var(--sc-accent);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.sc-pagetitle {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 2.6rem !important;
+    line-height: 1.05 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+    color: var(--sc-text) !important;
+}
+
+.sc-pageintro {
+    margin: 10px 0 0;
+    color: var(--sc-text-soft);
+    font-size: 0.98rem;
+}
+
 .sc-modal__title {
     color: var(--sc-text);
-}
-
-.struijck-cal-pagetitle {
-    font-size: 1.8rem !important;
-    margin-bottom: 8px !important;
-}
-
-.struijck-cal-intro {
-    color: #6b7280;
-    margin-bottom: 24px;
 }
 
 .struijck-cal-loading {
     padding: 60px;
     text-align: center;
-    color: #6b7280;
-    background: #fff;
-    border-radius: 8px;
+    color: var(--sc-text-soft);
+    background: var(--sc-surface);
+}
+
+/* Toolbar + legenda + grid vormen samen één zwevende witte kaart. */
+#struijck-calendar-app {
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-border);
+    border-radius: var(--sc-radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(26, 61, 58, 0.05), 0 18px 40px rgba(26, 61, 58, 0.07);
 }
 
 /* ===== Toolbar ===== */
@@ -51,10 +83,9 @@
     flex-wrap: wrap;
     gap: 10px;
     background: var(--sc-surface);
-    padding: 16px 20px;
-    border-radius: var(--sc-radius) var(--sc-radius) 0 0;
-    border: 1px solid var(--sc-border);
-    border-bottom: none;
+    padding: 18px 22px;
+    border: none;
+    border-bottom: 1px solid var(--sc-border);
 }
 
 .sc-toolbar__nav {
@@ -133,9 +164,7 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     background: var(--sc-border);
-    border: 1px solid var(--sc-border);
-    border-top: none;
-    border-radius: 0 0 var(--sc-radius) var(--sc-radius);
+    border: none;
     overflow: hidden;
     gap: 1px;
 }
@@ -518,9 +547,9 @@
     align-items: center;
     gap: 8px 18px;
     background: var(--sc-surface);
-    border: 1px solid var(--sc-border);
-    border-top: none;
-    padding: 12px 20px;
+    border: none;
+    border-bottom: 1px solid var(--sc-border);
+    padding: 14px 22px;
     font-size: 12px;
     color: var(--sc-text);
 }
@@ -653,6 +682,16 @@
 
 /* Responsive */
 @media (max-width: 782px) {
+    .struijck-cal-wrap {
+        margin: 10px 10px 0 0;
+        padding: 22px 16px 28px;
+    }
+    .sc-pagetitle {
+        font-size: 1.9rem !important;
+    }
+    .sc-pagehead {
+        margin-bottom: 18px;
+    }
     .sc-toolbar {
         flex-direction: column;
         align-items: stretch;
@@ -689,6 +728,12 @@
 }
 
 @media (max-width: 600px) {
+    .struijck-cal-wrap {
+        padding: 18px 12px 24px;
+    }
+    .sc-pagetitle {
+        font-size: 1.6rem !important;
+    }
     .sc-modal {
         padding: 0;
         align-items: flex-end;
