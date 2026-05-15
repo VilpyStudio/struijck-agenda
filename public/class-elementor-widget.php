@@ -85,35 +85,121 @@ class Struijck_Agenda_Elementor_Widget extends \Elementor\Widget_Base {
 
         $this->end_controls_section();
 
+        /* ===== Style: Kleuren ===== */
         $this->start_controls_section(
-            'style_section',
+            'style_colors',
             array(
-                'label' => __( 'Stijl', 'struijck-agenda' ),
+                'label' => __( 'Kleuren', 'struijck-agenda' ),
+                'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+            )
+        );
+
+        $colors = array(
+            'c_text'      => array( __( 'Tekstkleur', 'struijck-agenda' ), '--sa-text' ),
+            'c_text_soft' => array( __( 'Zachte tekst (subtitels)', 'struijck-agenda' ), '--sa-text-soft' ),
+            'c_accent'    => array( __( 'Accentkleur', 'struijck-agenda' ), '--sa-accent' ),
+            'c_bg'        => array( __( 'Achtergrond (kaart)', 'struijck-agenda' ), '--sa-bg' ),
+            'c_bg_soft'   => array( __( 'Zachte achtergrond', 'struijck-agenda' ), '--sa-bg-soft' ),
+            'c_border'    => array( __( 'Randkleur', 'struijck-agenda' ), '--sa-border' ),
+            'c_time'      => array( __( 'Tijd-kleur', 'struijck-agenda' ), '--sa-time-color' ),
+        );
+        foreach ( $colors as $key => $data ) {
+            $this->add_control(
+                $key,
+                array(
+                    'label'     => $data[0],
+                    'type'      => \Elementor\Controls_Manager::COLOR,
+                    'selectors' => array(
+                        '{{WRAPPER}} .struijck-agenda' => $data[1] . ': {{VALUE}};',
+                    ),
+                )
+            );
+        }
+
+        $this->end_controls_section();
+
+        /* ===== Style: Vormgeving ===== */
+        $this->start_controls_section(
+            'style_shape',
+            array(
+                'label' => __( 'Vormgeving', 'struijck-agenda' ),
                 'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
             )
         );
 
         $this->add_control(
-            'primary_color',
+            'radius',
             array(
-                'label'     => __( 'Hoofdkleur', 'struijck-agenda' ),
-                'type'      => \Elementor\Controls_Manager::COLOR,
-                'default'   => '',
-                'selectors' => array(
-                    '{{WRAPPER}} .struijck-agenda' => '--sa-color-primary: {{VALUE}};',
+                'label'      => __( 'Hoekafronding (kaart)', 'struijck-agenda' ),
+                'type'       => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => array( 'px' ),
+                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                'selectors'  => array(
+                    '{{WRAPPER}} .struijck-agenda' => '--sa-radius: {{SIZE}}{{UNIT}};',
                 ),
             )
         );
 
         $this->add_control(
-            'accent_color',
+            'radius_sm',
             array(
-                'label'     => __( 'Accentkleur (vandaag)', 'struijck-agenda' ),
-                'type'      => \Elementor\Controls_Manager::COLOR,
-                'default'   => '',
-                'selectors' => array(
-                    '{{WRAPPER}} .struijck-agenda' => '--sa-color-accent: {{VALUE}}; --sa-color-today-border: {{VALUE}};',
+                'label'      => __( 'Kleine afronding (knoppen/pills)', 'struijck-agenda' ),
+                'type'       => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => array( 'px' ),
+                'range'      => array( 'px' => array( 'min' => 0, 'max' => 30 ) ),
+                'selectors'  => array(
+                    '{{WRAPPER}} .struijck-agenda' => '--sa-radius-sm: {{SIZE}}{{UNIT}};',
                 ),
+            )
+        );
+
+        $this->add_responsive_control(
+            'content_padding',
+            array(
+                'label'      => __( 'Binnenmarge dag-inhoud', 'struijck-agenda' ),
+                'type'       => \Elementor\Controls_Manager::DIMENSIONS,
+                'size_units' => array( 'px', 'em', 'rem' ),
+                'selectors'  => array(
+                    '{{WRAPPER}} .struijck-agenda .sa-day-content' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ),
+            )
+        );
+
+        $this->end_controls_section();
+
+        /* ===== Style: Typografie ===== */
+        $this->start_controls_section(
+            'style_typography',
+            array(
+                'label' => __( 'Typografie', 'struijck-agenda' ),
+                'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+            )
+        );
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            array(
+                'name'     => 'typo_eyebrow',
+                'label'    => __( 'Eyebrow (label boven titel)', 'struijck-agenda' ),
+                'selector' => '{{WRAPPER}} .struijck-agenda .sa-week-eyebrow',
+            )
+        );
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            array(
+                'name'     => 'typo_time',
+                'label'    => __( 'Tijden', 'struijck-agenda' ),
+                'selector' => '{{WRAPPER}} .struijck-agenda .sa-day-row__time',
+            )
+        );
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            array(
+                'name'     => 'typo_title',
+                'label'    => __( 'Boekingstitel', 'struijck-agenda' ),
+                'selector' => '{{WRAPPER}} .struijck-agenda .sa-day-row__title',
             )
         );
 

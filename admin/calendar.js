@@ -269,7 +269,7 @@
         html += '  <label class="sc-form__label">' + esc(i18n.title) + ' *</label>';
         html += '  <div class="sc-combo" data-combo>';
         html += '    <input type="text" class="sc-form__input sc-combo__input" name="title" value="' + esc(data.title || '') + '" required autofocus placeholder="Kies of typ een huurder…" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list">';
-        html += '    <button type="button" class="sc-combo__toggle" tabindex="-1" aria-label="Toon huurders">▾</button>';
+        html += '    <button type="button" class="sc-combo__toggle" tabindex="-1" aria-label="Toon huurders"><span class="sc-combo__toggle-icon">▾</span></button>';
         html += '    <ul class="sc-combo__list" role="listbox" hidden></ul>';
         html += '  </div>';
         html += '</div>';
@@ -512,10 +512,12 @@
             if (all.length === 0) return;
             build(input.value);
             list.hidden = false;
+            combo.classList.add('is-open');
             input.setAttribute('aria-expanded', 'true');
         }
         function close() {
             list.hidden = true;
+            combo.classList.remove('is-open');
             input.setAttribute('aria-expanded', 'false');
             activeIdx = -1;
         }
@@ -540,6 +542,7 @@
             if (list.hidden) { open(); input.focus(); } else { close(); }
         });
         input.addEventListener('input', function() { open(); });
+        input.addEventListener('click', function() { if (list.hidden) { open(); } });
         input.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
