@@ -406,15 +406,24 @@
     padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 6px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.sa-mday:hover,
+.sa-mday:focus-visible {
+    background: var(--sa-bg-soft);
+    outline: none;
 }
 
 .sa-mday--other {
     background: var(--sa-bg-soft);
-    opacity: 0.65;
+    opacity: 0.6;
 }
 
 .sa-mday__num {
+    flex: 0 0 auto;
     font-size: 0.85rem;
     font-weight: 700;
     color: var(--sa-text);
@@ -429,6 +438,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Reserved area so days with/without events keep the number aligned. */
+.sa-mday__events {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1 1 auto;
 }
 
 .sa-mevent {
@@ -449,8 +466,72 @@
 
 .sa-mmore {
     font-size: 0.7rem;
-    color: var(--sa-text-soft);
-    font-weight: 600;
+    color: var(--sa-accent);
+    font-weight: 700;
+}
+
+/* ===== Day-detail modal ===== */
+.sa-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(26, 61, 58, 0.45);
+}
+
+.sa-modal__box {
+    background: var(--sa-bg);
+    border-radius: var(--sa-radius);
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(26, 61, 58, 0.3);
+}
+
+.sa-modal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px;
+    background: var(--sa-bg-soft);
+    border-bottom: 1px solid var(--sa-border);
+}
+
+.sa-modal__title {
+    font-weight: 700;
+    color: var(--sa-text);
+    text-transform: capitalize;
+    font-size: 1.05rem;
+}
+
+.struijck-agenda .sa-modal__close {
+    font-size: 1.5rem !important;
+    line-height: 1 !important;
+    color: var(--sa-text-soft) !important;
+    background: none !important;
+    padding: 4px 8px !important;
+    border-radius: 8px !important;
+}
+
+.struijck-agenda .sa-modal__close:hover {
+    color: var(--sa-accent) !important;
+    background: var(--sa-accent-soft) !important;
+}
+
+.sa-modal__body {
+    padding: 8px 22px 22px;
+    overflow-y: auto;
+}
+
+.sa-modal__body .sa-day-row {
+    grid-template-columns: 92px 1fr;
 }
 
 /* ===== Responsive — geen side-scroll ===== */
@@ -525,16 +606,18 @@
         margin-top: 1px;
     }
 
-    /* MAAND: past op schermbreedte, boekingen als stipjes (geen scroll). */
+    /* MAAND: past op schermbreedte; boekingen als stipjes. Tik op een dag
+       voor de tijden. Even hoge cellen zodat niets verspringt. */
     .sa-month__hcell {
         padding: 8px 2px;
         font-size: 0.62rem;
     }
     .sa-mday {
-        min-height: 64px;
-        padding: 5px 3px;
-        gap: 3px;
+        min-height: 62px;
+        padding: 6px 3px;
+        gap: 4px;
         align-items: center;
+        justify-content: flex-start;
     }
     .sa-mday__num {
         font-size: 0.8rem;
@@ -544,6 +627,16 @@
         width: 22px;
         height: 22px;
         margin: 0 auto;
+    }
+    .sa-mday__events {
+        flex: 0 0 auto;
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        min-height: 9px;
     }
     .sa-mevent {
         width: 7px;
@@ -557,16 +650,19 @@
         text-indent: -9999px;
         overflow: hidden;
     }
-    .sa-mday {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .sa-mday__num {
-        flex: 0 0 100%;
-    }
     .sa-mmore {
         display: none;
+    }
+
+    /* Day-detail modal als bottom sheet op mobiel. */
+    .sa-modal {
+        padding: 0;
+        align-items: flex-end;
+    }
+    .sa-modal__box {
+        max-width: 100%;
+        max-height: 90vh;
+        border-radius: var(--sa-radius) var(--sa-radius) 0 0;
     }
 }
 

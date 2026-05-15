@@ -244,15 +244,18 @@
             var cls = 'sa-mday';
             if (it.getMonth() !== curMonth) cls += ' sa-mday--other';
             if (dStr === todayStr) cls += ' sa-mday--today';
-            h += '<div class="' + cls + '">';
-            h += '<span class="sa-mday__num">' + it.getDate() + '</span>';
             var ev = this.eventsOn(dStr);
+            if (ev.length) cls += ' sa-mday--has';
+            h += '<div class="' + cls + '" data-date="' + dStr + '" role="button" tabindex="0">';
+            h += '<span class="sa-mday__num">' + it.getDate() + '</span>';
+            h += '<div class="sa-mday__events">';
             ev.slice(0, 3).forEach(function(e) {
                 h += '<span class="sa-mevent">' +
                      (e.start_time ? '<b>' + esc(e.start_time.substring(0, 5)) + '</b> ' : '') +
                      esc(e.title) + '</span>';
             });
-            if (ev.length > 3) h += '<span class="sa-mmore">+' + (ev.length - 3) + '</span>';
+            if (ev.length > 3) h += '<span class="sa-mmore">+' + (ev.length - 3) + ' meer</span>';
+            h += '</div>';
             h += '</div>';
             it = this.addDays(it, 1);
         }
@@ -310,6 +313,47 @@
                 self.fetchAndRender();
             });
         });
+        this.root.querySelectorAll('.sa-mday[data-date]').forEach(function(c) {
+            var open = function() { self.openDay(c.dataset.date); };
+            c.addEventListener('click', open);
+            c.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+            });
+        });
+    };
+
+    /* Day-detail overlay (month → all bookings of a day, incl. mobile). */
+    P.openDay = function(dateStr) {
+        var p = dateStr.split('-');
+        var d = new Date(+p[0], +p[1] - 1, +p[2]);
+        var wl = this.i18n.weekdaysLong, m = this.i18n.months;
+        var label = esc(wl[(d.getDay() + 6) % 7]) + ' ' + d.getDate() + ' ' + esc(m[d.getMonth()]) + ' ' + d.getFullYear();
+        var ev = this.eventsOn(dateStr);
+
+        var body = '';
+        if (!ev.length) {
+            body = '<div class="sa-day-empty">' + esc(this.i18n.noEvents) + '</div>';
+        } else {
+            ev.forEach(function(e) { body += this.rowHtml(e); }, this);
+        }
+
+        var wrap = document.createElement('div');
+        wrap.className = 'sa-modal';
+        wrap.innerHTML =
+            '<div class="sa-modal__box" role="dialog" aria-modal="true">' +
+            '<div class="sa-modal__head"><span class="sa-modal__title">' + label + '</span>' +
+            '<button type="button" class="sa-modal__close" aria-label="' + esc(this.i18n.close || 'Sluiten') + '">×</button></div>' +
+            '<div class="sa-modal__body">' + body + '</div></div>';
+        this.root.appendChild(wrap);
+
+        var close = function() {
+            if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+            document.removeEventListener('keydown', onKey);
+        };
+        var onKey = function(e) { if (e.key === 'Escape') close(); };
+        wrap.addEventListener('click', function(e) { if (e.target === wrap) close(); });
+        wrap.querySelector('.sa-modal__close').addEventListener('click', close);
+        document.addEventListener('keydown', onKey);
     };
 
     /* Helpers */
