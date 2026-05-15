@@ -46,7 +46,7 @@ class Struijck_Agenda_Meta_Fields {
     public static function get_activity_meta( $post_id ) {
         $meta = array();
         foreach ( array_keys( self::META_KEYS ) as $key ) {
-            $clean_key       = ltrim( $key, '_struijck_' );
+            $clean_key       = substr( $key, strlen( '_struijck_' ) );
             $meta[ $clean_key ] = get_post_meta( $post_id, $key, true );
         }
         return $meta;
