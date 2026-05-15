@@ -24,6 +24,65 @@ class Struijck_Agenda_GitHub_Updater {
         add_filter( 'plugins_api', array( __CLASS__, 'plugin_info' ), 10, 3 );
         add_filter( 'upgrader_source_selection', array( __CLASS__, 'fix_source_dir' ), 10, 4 );
         add_action( 'upgrader_process_complete', array( __CLASS__, 'flush_cache' ), 10, 2 );
+
+        add_filter( 'plugin_action_links_' . self::plugin_basename(), array( __CLASS__, 'action_links' ) );
+        add_action( 'admin_init', array( __CLASS__, 'maybe_force_check' ) );
+        add_action( 'admin_notices', array( __CLASS__, 'maybe_notice' ) );
+    }
+
+    /**
+     * Add a "Controleer op nieuwe versies" link on the plugins screen.
+     */
+    public static function action_links( $links ) {
+        $url = wp_nonce_url(
+            add_query_arg( 'struijck_check_update', '1', self_admin_url( 'plugins.php' ) ),
+            'struijck_check_update'
+        );
+        $links[] = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Controleer op nieuwe versies', 'struijck-agenda' ) . '</a>';
+        return $links;
+    }
+
+    /**
+     * Clear our cache + WordPress' plugin-update cache and re-check now.
+     */
+    public static function maybe_force_check() {
+        if ( empty( $_GET['struijck_check_update'] ) ) {
+            return;
+        }
+        if ( ! current_user_can( 'update_plugins' ) ) {
+            return;
+        }
+        check_admin_referer( 'struijck_check_update' );
+
+        delete_site_transient( self::TRANSIENT );
+        delete_site_transient( 'update_plugins' );
+        wp_update_plugins();
+
+        wp_safe_redirect( add_query_arg( 'struijck_checked', '1', self_admin_url( 'plugins.php' ) ) );
+        exit;
+    }
+
+    public static function maybe_notice() {
+        if ( empty( $_GET['struijck_checked'] ) ) {
+            return;
+        }
+        $release = self::get_release();
+        if ( $release && version_compare( $release['version'], STRUIJCK_AGENDA_VERSION, '>' ) ) {
+            $msg   = sprintf(
+                /* translators: %s: version number */
+                __( 'Struijck Agenda: versie %s is beschikbaar — zie de update hieronder.', 'struijck-agenda' ),
+                $release['version']
+            );
+            $class = 'notice-warning';
+        } else {
+            $msg   = sprintf(
+                /* translators: %s: version number */
+                __( 'Struijck Agenda: je gebruikt de nieuwste versie (%s).', 'struijck-agenda' ),
+                STRUIJCK_AGENDA_VERSION
+            );
+            $class = 'notice-success';
+        }
+        echo '<div class="notice ' . esc_attr( $class ) . ' is-dismissible"><p>' . esc_html( $msg ) . '</p></div>';
     }
 
     /** owner/repo, e.g. "VilpyStudio/struijck-agenda". */
