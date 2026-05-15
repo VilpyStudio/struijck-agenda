@@ -58,7 +58,11 @@ class Struijck_Agenda_Shortcode {
             'lockedZaal' => $atts['zaal'],
             'showFilters' => 'yes' === $atts['filters'] && empty( $atts['zaal'] ),
             'zalen'      => array_map( function( $t ) {
-                return array( 'slug' => $t->slug, 'name' => $t->name );
+                return array(
+                    'slug'        => $t->slug,
+                    'name'        => $t->name,
+                    'allowDouble' => '1' === get_term_meta( $t->term_id, Struijck_Agenda_Post_Types::ALLOW_DOUBLE_META, true ),
+                );
             }, $zalen ),
             'i18n'       => array(
                 'months'     => array(

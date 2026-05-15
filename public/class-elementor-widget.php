@@ -217,6 +217,37 @@ class Struijck_Agenda_Elementor_Widget extends \Elementor\Widget_Base {
         );
 
         $this->end_controls_section();
+
+        /* ===== Style: Aanvraagformulier ===== */
+        $this->start_controls_section(
+            'style_request',
+            array(
+                'label' => __( 'Aanvraagformulier', 'struijck-agenda' ),
+                'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+            )
+        );
+
+        $this->add_control(
+            'request_btn_color',
+            array(
+                'label'     => __( 'Aanvraag-knop kleur', 'struijck-agenda' ),
+                'type'      => \Elementor\Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .struijck-agenda' => '--sa-request-bg: {{VALUE}};',
+                ),
+            )
+        );
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            array(
+                'name'     => 'typo_form_label',
+                'label'    => __( 'Formulier-labels', 'struijck-agenda' ),
+                'selector' => '{{WRAPPER}} .struijck-agenda .sa-field > span',
+            )
+        );
+
+        $this->end_controls_section();
     }
 
     protected function render() {

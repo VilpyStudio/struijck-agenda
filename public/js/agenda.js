@@ -413,6 +413,7 @@
             '<label class="sa-field"><span>Eindtijd</span>' +
             '<select name="end_time">' + this.timeOpts('') + '</select></label>' +
             '</div>' +
+            '<div class="sa-avail" hidden></div>' +
             '<label class="sa-field"><span>Opmerking</span>' +
             '<textarea name="opmerking" rows="3"></textarea></label>' +
             '<input type="text" name="website" class="sa-hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
@@ -441,6 +442,77 @@
 
         var formEl = wrap.querySelector('.sa-form');
         var msg = wrap.querySelector('.sa-form__msg');
+
+        /* Availability: disable time slots already booked for the chosen
+           zaal/date (skipped when the zaal mag dubbel of geen zaal). */
+        var avail = wrap.querySelector('.sa-avail');
+        var zaalEl = formEl.querySelector('[name="zaal"]');
+        var dateEl = formEl.querySelector('[name="date"]');
+        var startEl = formEl.querySelector('[name="start_time"]');
+        var endEl = formEl.querySelector('[name="end_time"]');
+        var booked = [];
+
+        var tmin = function(t) {
+            var m = /^(\d{1,2}):(\d{2})/.exec(t || '');
+            return m ? (+m[1]) * 60 + (+m[2]) : null;
+        };
+        var fmt = function(x) {
+            var h = Math.floor(x / 60), mm = x % 60;
+            return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
+        };
+        var allowsDouble = function(slug) {
+            var ad = false;
+            (self.config.zalen || []).forEach(function(z) { if (z.slug === slug) ad = !!z.allowDouble; });
+            return ad;
+        };
+        var applyDisable = function() {
+            Array.prototype.forEach.call(startEl.options, function(o) {
+                if (!o.value) { o.disabled = false; return; }
+                var v = tmin(o.value);
+                o.disabled = booked.some(function(b) { return v >= b.s && v < b.e; });
+            });
+            if (startEl.selectedOptions[0] && startEl.selectedOptions[0].disabled) startEl.value = '';
+            var sMin = tmin(startEl.value);
+            Array.prototype.forEach.call(endEl.options, function(o) {
+                if (!o.value) { o.disabled = false; return; }
+                var v = tmin(o.value);
+                if (sMin == null) { o.disabled = false; return; }
+                o.disabled = (v <= sMin) || booked.some(function(b) { return sMin < b.e && b.s < v; });
+            });
+            if (endEl.selectedOptions[0] && endEl.selectedOptions[0].disabled) endEl.value = '';
+        };
+        var refresh = function() {
+            var slug = zaalEl.value, date = dateEl.value;
+            booked = [];
+            if (!slug || !date || allowsDouble(slug)) { avail.hidden = true; applyDisable(); return; }
+            fetch(self.config.restUrl + '?start=' + encodeURIComponent(date) + '&end=' + encodeURIComponent(date) + '&zaal=' + encodeURIComponent(slug),
+                  { headers: { 'Accept': 'application/json' } })
+                .then(function(r) { return r.json(); })
+                .then(function(list) {
+                    booked = (Array.isArray(list) ? list : [])
+                        .filter(function(e) { return e.date === date && e.start_time; })
+                        .map(function(e) {
+                            var s = tmin(e.start_time), en = tmin(e.end_time);
+                            if (en == null || en <= s) en = s + 30;
+                            return { s: s, e: en };
+                        });
+                    if (booked.length) {
+                        avail.hidden = false;
+                        avail.textContent = 'Al bezet: ' + booked.slice()
+                            .sort(function(a, b) { return a.s - b.s; })
+                            .map(function(b) { return fmt(b.s) + '–' + fmt(b.e); }).join(', ');
+                    } else {
+                        avail.hidden = true;
+                    }
+                    applyDisable();
+                })
+                .catch(function() { avail.hidden = true; applyDisable(); });
+        };
+        zaalEl.addEventListener('change', refresh);
+        dateEl.addEventListener('change', refresh);
+        startEl.addEventListener('change', applyDisable);
+        refresh();
+
         formEl.addEventListener('submit', function(e) {
             e.preventDefault();
             var data = {};

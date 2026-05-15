@@ -552,9 +552,9 @@
     align-items: center;
     gap: 6px;
     padding: 11px 22px !important;
-    background: var(--sa-accent) !important;
+    background: var(--sa-request-bg, var(--sa-accent)) !important;
     color: #fff !important;
-    border: 1px solid var(--sa-accent) !important;
+    border: 1px solid var(--sa-request-bg, var(--sa-accent)) !important;
     border-radius: var(--sa-radius-sm) !important;
     font-size: 0.9rem;
     font-weight: 700;
@@ -565,6 +565,18 @@
     background: var(--sa-text) !important;
     border-color: var(--sa-text) !important;
     color: #fff !important;
+}
+
+.sa-avail {
+    font-size: 0.8rem;
+    color: var(--sa-accent);
+    background: var(--sa-accent-soft);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.struijck-agenda .sa-form option:disabled {
+    color: #b9b9b9;
 }
 
 .sa-form {
