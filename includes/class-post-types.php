@@ -12,6 +12,50 @@ class Struijck_Agenda_Post_Types {
     public static function init() {
         add_action( 'init', array( __CLASS__, 'register_post_type' ) );
         add_action( 'init', array( __CLASS__, 'register_taxonomy' ) );
+
+        // "Mag dubbel verhuurd worden" toggle on zaal terms.
+        add_action( 'struijck_zaal_add_form_fields', array( __CLASS__, 'zaal_add_field' ) );
+        add_action( 'struijck_zaal_edit_form_fields', array( __CLASS__, 'zaal_edit_field' ) );
+        add_action( 'created_struijck_zaal', array( __CLASS__, 'save_zaal_field' ) );
+        add_action( 'edited_struijck_zaal', array( __CLASS__, 'save_zaal_field' ) );
+    }
+
+    const ALLOW_DOUBLE_META = '_struijck_allow_double';
+
+    public static function zaal_add_field() {
+        ?>
+        <div class="form-field">
+            <label for="struijck_allow_double">
+                <input type="checkbox" name="struijck_allow_double" id="struijck_allow_double" value="1" />
+                <?php esc_html_e( 'Mag dubbel verhuurd worden (bijv. de kantine)', 'struijck-agenda' ); ?>
+            </label>
+            <p><?php esc_html_e( 'Aan = meerdere boekingen tegelijk toegestaan. Uit = de zaal kan maar één keer per tijdstip verhuurd worden.', 'struijck-agenda' ); ?></p>
+        </div>
+        <?php
+    }
+
+    public static function zaal_edit_field( $term ) {
+        $checked = '1' === get_term_meta( $term->term_id, self::ALLOW_DOUBLE_META, true );
+        ?>
+        <tr class="form-field">
+            <th scope="row"><label for="struijck_allow_double"><?php esc_html_e( 'Dubbele boekingen', 'struijck-agenda' ); ?></label></th>
+            <td>
+                <label>
+                    <input type="checkbox" name="struijck_allow_double" id="struijck_allow_double" value="1" <?php checked( $checked ); ?> />
+                    <?php esc_html_e( 'Mag dubbel verhuurd worden (bijv. de kantine)', 'struijck-agenda' ); ?>
+                </label>
+                <p class="description"><?php esc_html_e( 'Uit = de zaal kan maar één keer per tijdstip verhuurd worden.', 'struijck-agenda' ); ?></p>
+            </td>
+        </tr>
+        <?php
+    }
+
+    public static function save_zaal_field( $term_id ) {
+        if ( ! current_user_can( 'manage_categories' ) ) {
+            return;
+        }
+        $value = ! empty( $_POST['struijck_allow_double'] ) ? '1' : '0';
+        update_term_meta( $term_id, self::ALLOW_DOUBLE_META, $value );
     }
 
     public static function register_post_type() {

@@ -44,6 +44,15 @@
         html += '  <div class="sc-toolbar__help">Klik op een dag om te plannen</div>';
         html += '</div>';
 
+        // Legenda
+        html += '<div class="sc-legend">';
+        (cfg.zalen || []).forEach(function(z) {
+            html += '<span class="sc-legend__item"><span class="sc-legend__swatch" style="background:' + esc(z.color) + '"></span>' + esc(z.name) + (z.allowDouble ? ' <em>(dubbel mogelijk)</em>' : '') + '</span>';
+        });
+        html += '<span class="sc-legend__item"><span class="sc-legend__swatch" style="background:#9ca3af"></span>Geen zaal</span>';
+        html += '<span class="sc-legend__item sc-legend__item--note">↻ = wekelijks terugkerend</span>';
+        html += '</div>';
+
         // Grid headers
         html += '<div class="sc-grid">';
         i18n.weekdaysShort.forEach(function(w) {
@@ -81,10 +90,10 @@
             html += '  <div class="sc-day__events">';
 
             events.slice(0, 4).forEach(function(e) {
-                var pillClass = 'sc-event';
-                if (e.is_recurring) pillClass += ' sc-event--recurring';
-                html += '<button class="' + pillClass + '" data-event-id="' + esc(e.id) + '" data-event-date="' + esc(e.date) + '">';
+                var label = e.title + (e.zaal ? ' — ' + e.zaal : '');
+                html += '<button class="sc-event" style="background:' + eventColor(e) + ';" data-event-id="' + esc(e.id) + '" data-event-date="' + esc(e.date) + '" title="' + esc(label) + '">';
                 if (e.start_time) html += '<span class="sc-event__time">' + esc(e.start_time.substring(0, 5)) + '</span>';
+                if (e.is_recurring) html += '<span class="sc-event__repeat">↻</span> ';
                 html += esc(e.title);
                 html += '</button>';
             });
@@ -258,12 +267,11 @@
 
         html += '<div class="sc-form__row">';
         html += '  <label class="sc-form__label">' + esc(i18n.title) + ' *</label>';
-        html += '  <input type="text" class="sc-form__input" name="title" value="' + esc(data.title || '') + '" required autofocus placeholder="Kies of typ een huurder…" list="sc-huurder-list" autocomplete="off">';
-        html += '  <datalist id="sc-huurder-list">';
-        (cfg.huurders || []).forEach(function(h) {
-            html += '<option value="' + esc(h) + '"></option>';
-        });
-        html += '  </datalist>';
+        html += '  <div class="sc-combo" data-combo>';
+        html += '    <input type="text" class="sc-form__input sc-combo__input" name="title" value="' + esc(data.title || '') + '" required autofocus placeholder="Kies of typ een huurder…" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list">';
+        html += '    <button type="button" class="sc-combo__toggle" tabindex="-1" aria-label="Toon huurders">▾</button>';
+        html += '    <ul class="sc-combo__list" role="listbox" hidden></ul>';
+        html += '  </div>';
         html += '</div>';
 
         html += '<div class="sc-form__row">';
@@ -316,6 +324,8 @@
         html += '</div></div></div>';
 
         showModal(html, function(modal) {
+            setupCombo(modal);
+
             var recurCb = modal.querySelector('#sc-recurring-cb');
             var recurOpts = modal.querySelector('#sc-recur-options');
             if (recurCb && recurOpts) {
@@ -460,6 +470,100 @@
         }
         return out;
     }
+    function eventColor(ev) {
+        if (!ev.zaal) return '#9ca3af';
+        var name = String(ev.zaal).split(',')[0].trim();
+        var color = '#9ca3af';
+        (cfg.zalen || []).forEach(function(z) {
+            if (z.name === name) color = z.color;
+        });
+        return color;
+    }
+
+    // Custom combobox for the huurder field: filter-as-you-type, click,
+    // keyboard nav, free entry. Replaces the native <datalist>.
+    function setupCombo(scope) {
+        var combo = scope.querySelector('[data-combo]');
+        if (!combo) return;
+        var input = combo.querySelector('.sc-combo__input');
+        var toggle = combo.querySelector('.sc-combo__toggle');
+        var list = combo.querySelector('.sc-combo__list');
+        var all = (cfg.huurders || []).slice();
+        var items = [];
+        var activeIdx = -1;
+
+        function build(filter) {
+            var f = (filter || '').toLowerCase().trim();
+            var matches = all.filter(function(h) {
+                return !f || h.toLowerCase().indexOf(f) !== -1;
+            });
+            if (matches.length === 0) {
+                list.innerHTML = '<li class="sc-combo__empty">Geen bestaande huurders — typ een nieuwe naam</li>';
+                items = [];
+            } else {
+                list.innerHTML = matches.map(function(h) {
+                    return '<li class="sc-combo__opt" role="option">' + esc(h) + '</li>';
+                }).join('');
+                items = Array.prototype.slice.call(list.querySelectorAll('.sc-combo__opt'));
+            }
+            activeIdx = -1;
+        }
+        function open() {
+            if (all.length === 0) return;
+            build(input.value);
+            list.hidden = false;
+            input.setAttribute('aria-expanded', 'true');
+        }
+        function close() {
+            list.hidden = true;
+            input.setAttribute('aria-expanded', 'false');
+            activeIdx = -1;
+        }
+        function setActive(i) {
+            activeIdx = i;
+            items.forEach(function(el, idx) {
+                el.classList.toggle('is-active', idx === i);
+            });
+            if (items[i]) items[i].scrollIntoView({ block: 'nearest' });
+        }
+        function pick(text) {
+            input.value = text;
+            close();
+            input.focus();
+        }
+
+        list.addEventListener('mousedown', function(e) {
+            var opt = e.target.closest('.sc-combo__opt');
+            if (opt) { e.preventDefault(); pick(opt.textContent); }
+        });
+        toggle.addEventListener('click', function() {
+            if (list.hidden) { open(); input.focus(); } else { close(); }
+        });
+        input.addEventListener('input', function() { open(); });
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (list.hidden) { open(); }
+                if (items.length) { setActive(activeIdx + 1 >= items.length ? items.length - 1 : activeIdx + 1); }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (items.length) { setActive(activeIdx <= 0 ? 0 : activeIdx - 1); }
+            } else if (e.key === 'Enter') {
+                if (!list.hidden) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (activeIdx >= 0 && items[activeIdx]) { pick(items[activeIdx].textContent); }
+                    else { close(); }
+                }
+            } else if (e.key === 'Escape') {
+                if (!list.hidden) { e.stopPropagation(); close(); }
+            }
+        });
+        scope.addEventListener('mousedown', function(e) {
+            if (!e.target.closest('[data-combo]')) { close(); }
+        });
+    }
+
     function ymd(d) {
         var m = d.getMonth() + 1, day = d.getDate();
         return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;

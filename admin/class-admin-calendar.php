@@ -52,12 +52,21 @@ class Struijck_Agenda_Admin_Calendar {
             true
         );
 
-        // Get zalen for the UI.
+        // Get zalen for the UI, each with a stable color + double-booking flag.
+        $palette     = array( '#2563eb', '#059669', '#d97706', '#7c3aed', '#db2777', '#0891b2', '#65a30d', '#dc2626', '#0d9488', '#9333ea' );
         $zalen_terms = get_terms( array( 'taxonomy' => 'struijck_zaal', 'hide_empty' => false ) );
         $zalen       = array();
         if ( ! is_wp_error( $zalen_terms ) ) {
+            $idx = 0;
             foreach ( $zalen_terms as $t ) {
-                $zalen[] = array( 'id' => $t->term_id, 'slug' => $t->slug, 'name' => $t->name );
+                $zalen[] = array(
+                    'id'          => $t->term_id,
+                    'slug'        => $t->slug,
+                    'name'        => $t->name,
+                    'color'       => $palette[ $idx % count( $palette ) ],
+                    'allowDouble' => '1' === get_term_meta( $t->term_id, Struijck_Agenda_Post_Types::ALLOW_DOUBLE_META, true ),
+                );
+                $idx++;
             }
         }
 
@@ -167,6 +176,18 @@ class Struijck_Agenda_Admin_Calendar {
             wp_send_json_error( 'Vul minimaal titel, datum en starttijd in' );
         }
 
+        // Conflictcontrole: een zaal die niet dubbel verhuurd mag worden,
+        // kan niet twee overlappende boekingen op hetzelfde tijdstip hebben.
+        if ( $zaal_id ) {
+            $allow_double = '1' === get_term_meta( $zaal_id, Struijck_Agenda_Post_Types::ALLOW_DOUBLE_META, true );
+            if ( ! $allow_double ) {
+                $conflict = self::find_conflict( $id, $zaal_id, $date, $start_time, $end_time, $recurring, $recur_until );
+                if ( $conflict ) {
+                    wp_send_json_error( $conflict );
+                }
+            }
+        }
+
         $post_data = array(
             'post_type'    => 'struijck_activiteit',
             'post_status'  => 'publish',
@@ -236,5 +257,102 @@ class Struijck_Agenda_Admin_Calendar {
         }
 
         wp_send_json_success();
+    }
+
+    /**
+     * Check whether a (possibly recurring) booking overlaps an existing one
+     * in the same zaal. Returns a human-readable message on conflict, or ''.
+     */
+    protected static function find_conflict( $current_id, $zaal_id, $date, $start_time, $end_time, $recurring, $recur_until ) {
+        $dates = self::booking_dates( $date, $recurring, $recur_until );
+        if ( empty( $dates ) ) {
+            return '';
+        }
+        $date_set = array_flip( $dates );
+        $min      = min( $dates );
+        $max      = max( $dates );
+
+        $occurrences = Struijck_Agenda_Recurring::get_occurrences( $min, $max, array(
+            'tax_query' => array(
+                array(
+                    'taxonomy' => 'struijck_zaal',
+                    'field'    => 'term_id',
+                    'terms'    => $zaal_id,
+                ),
+            ),
+        ) );
+
+        $new_start = self::to_min( $start_time );
+        $new_end   = self::to_min( $end_time ? $end_time : $start_time );
+        $zaal_term = get_term( $zaal_id, 'struijck_zaal' );
+        $zaal_name = ( $zaal_term && ! is_wp_error( $zaal_term ) ) ? $zaal_term->name : 'deze zaal';
+
+        foreach ( $occurrences as $o ) {
+            if ( (int) $o['id'] === (int) $current_id ) {
+                continue;
+            }
+            if ( ! isset( $date_set[ $o['date'] ] ) ) {
+                continue;
+            }
+            $o_start = self::to_min( $o['start_time'] );
+            $o_end   = self::to_min( ! empty( $o['end_time'] ) ? $o['end_time'] : $o['start_time'] );
+
+            if ( self::times_overlap( $new_start, $new_end, $o_start, $o_end ) ) {
+                $range = substr( (string) $o['start_time'], 0, 5 );
+                if ( ! empty( $o['end_time'] ) ) {
+                    $range .= '–' . substr( (string) $o['end_time'], 0, 5 );
+                }
+                return sprintf(
+                    'Dubbele boeking: "%1$s" staat op %2$s al om %3$s in %4$s. De %4$s kan maar één keer per tijdstip verhuurd worden.',
+                    $o['title'],
+                    $o['date'],
+                    $range,
+                    $zaal_name
+                );
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * The concrete dates a booking occupies (single, or weekly until end).
+     */
+    protected static function booking_dates( $date, $recurring, $recur_until ) {
+        $dates = array( $date );
+        if ( ! $recurring ) {
+            return $dates;
+        }
+        $start = strtotime( $date );
+        $end   = $recur_until ? strtotime( $recur_until ) : strtotime( '+1 year', $start );
+        $cur   = strtotime( '+7 day', $start );
+        $i     = 0;
+        while ( $cur <= $end && $i < 400 ) {
+            $dates[] = gmdate( 'Y-m-d', $cur );
+            $cur     = strtotime( '+7 day', $cur );
+            $i++;
+        }
+        return $dates;
+    }
+
+    /** "HH:MM" (or "HH:MM:SS") -> minutes since midnight. */
+    protected static function to_min( $time ) {
+        if ( ! preg_match( '/^(\d{1,2}):(\d{2})/', (string) $time, $m ) ) {
+            return 0;
+        }
+        return ( (int) $m[1] ) * 60 + (int) $m[2];
+    }
+
+    protected static function times_overlap( $a_start, $a_end, $b_start, $b_end ) {
+        if ( $a_end <= $a_start ) {
+            $a_end = $a_start;
+        }
+        if ( $b_end <= $b_start ) {
+            $b_end = $b_start;
+        }
+        if ( $a_start === $b_start ) {
+            return true;
+        }
+        return $a_start < $b_end && $b_start < $a_end;
     }
 }
