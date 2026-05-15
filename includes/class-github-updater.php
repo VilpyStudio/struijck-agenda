@@ -25,21 +25,25 @@ class Struijck_Agenda_GitHub_Updater {
         add_filter( 'upgrader_source_selection', array( __CLASS__, 'fix_source_dir' ), 10, 4 );
         add_action( 'upgrader_process_complete', array( __CLASS__, 'flush_cache' ), 10, 2 );
 
-        add_filter( 'plugin_action_links_' . self::plugin_basename(), array( __CLASS__, 'action_links' ) );
+        add_filter( 'plugin_row_meta', array( __CLASS__, 'row_meta' ), 10, 2 );
         add_action( 'admin_init', array( __CLASS__, 'maybe_force_check' ) );
         add_action( 'admin_notices', array( __CLASS__, 'maybe_notice' ) );
     }
 
     /**
-     * Add a "Controleer op nieuwe versies" link on the plugins screen.
+     * Add a "Controleer op nieuwe versies" link in the plugin meta row
+     * (next to the version / author / "Bezoek plugin site" links).
      */
-    public static function action_links( $links ) {
+    public static function row_meta( $meta, $file ) {
+        if ( self::plugin_basename() !== $file ) {
+            return $meta;
+        }
         $url = wp_nonce_url(
             add_query_arg( 'struijck_check_update', '1', self_admin_url( 'plugins.php' ) ),
             'struijck_check_update'
         );
-        $links[] = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Controleer op nieuwe versies', 'struijck-agenda' ) . '</a>';
-        return $links;
+        $meta[] = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Controleer op nieuwe versies', 'struijck-agenda' ) . '</a>';
+        return $meta;
     }
 
     /**

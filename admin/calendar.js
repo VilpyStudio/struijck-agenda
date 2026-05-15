@@ -250,6 +250,13 @@
                 if (z.name === data.zaal) zaalId = z.id;
             });
         }
+        // New booking (or zaal not matched): default to Sporthal, else first zaal.
+        if (!zaalId) {
+            cfg.zalen.forEach(function(z) {
+                if (z.name.toLowerCase() === 'sporthal') zaalId = z.id;
+            });
+            if (!zaalId && cfg.zalen.length) zaalId = cfg.zalen[0].id;
+        }
 
         var html = '<div class="sc-modal-content"><div class="sc-modal__header">';
         html += '<h3 class="sc-modal__title">' + esc(isEdit ? i18n.editBooking : i18n.newBooking) + '</h3>';
@@ -280,7 +287,6 @@
             html += '  <div class="sc-form__no-zalen">' + esc(i18n.noZalen) + ' <a href="' + esc(cfg.newZaalUrl) + '" target="_blank">Zaal aanmaken</a></div>';
         } else {
             html += '  <select class="sc-form__select" name="zaal_id">';
-            html += '    <option value="">' + esc(i18n.pickZaal) + '</option>';
             cfg.zalen.forEach(function(z) {
                 var sel = (String(z.id) === String(zaalId)) ? ' selected' : '';
                 html += '<option value="' + esc(z.id) + '"' + sel + '>' + esc(z.name) + '</option>';
