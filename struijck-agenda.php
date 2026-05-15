@@ -3,7 +3,7 @@
  * Plugin Name: Struijck Agenda
  * Plugin URI:  https://github.com/VilpyStudio/struijck-agenda
  * Description: Agenda- en activiteitenbeheer voor sporthal De Struijck. Beheer activiteiten per zaal, met ondersteuning voor terugkerende afspraken, en toon de agenda op de site via shortcode of Elementor widget.
- * Version:     1.6.2
+ * Version:     1.6.3
  * Author:      Studio Vilpy
  * Author URI:  https://github.com/VilpyStudio
  * License:     GPL-2.0+
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'STRUIJCK_AGENDA_VERSION', '1.6.2' );
+define( 'STRUIJCK_AGENDA_VERSION', '1.6.3' );
 define( 'STRUIJCK_AGENDA_FILE', __FILE__ );
 define( 'STRUIJCK_AGENDA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'STRUIJCK_AGENDA_URL', plugin_dir_url( __FILE__ ) );

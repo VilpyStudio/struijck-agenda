@@ -364,6 +364,14 @@
 
     function saveBooking(modal, saveBtn) {
         var form = modal.querySelector('#sc-form');
+
+        var stEl = form.querySelector('[name="start_time"]');
+        var etEl = form.querySelector('[name="end_time"]');
+        if (stEl && etEl && etEl.value && etEl.value <= stEl.value) {
+            alert('De eindtijd moet na de starttijd liggen.');
+            return;
+        }
+
         var fd = new FormData(form);
         fd.append('action', 'struijck_save_booking');
         fd.append('nonce', cfg.nonce);

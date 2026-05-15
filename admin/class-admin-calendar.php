@@ -174,6 +174,10 @@ class Struijck_Agenda_Admin_Calendar {
             wp_send_json_error( 'Vul minimaal titel, datum en starttijd in' );
         }
 
+        if ( $end_time && self::to_min( $end_time ) <= self::to_min( $start_time ) ) {
+            wp_send_json_error( 'De eindtijd moet na de starttijd liggen.' );
+        }
+
         // Conflictcontrole: een zaal die niet dubbel verhuurd mag worden,
         // kan niet twee overlappende boekingen op hetzelfde tijdstip hebben.
         if ( $zaal_id ) {

@@ -18,6 +18,37 @@ class Struijck_Agenda_Post_Types {
         add_action( 'struijck_zaal_edit_form_fields', array( __CLASS__, 'zaal_edit_field' ) );
         add_action( 'created_struijck_zaal', array( __CLASS__, 'save_zaal_field' ) );
         add_action( 'edited_struijck_zaal', array( __CLASS__, 'save_zaal_field' ) );
+
+        // Deleting a huurder also removes all of that huurder's bookings.
+        add_action( 'pre_delete_term', array( __CLASS__, 'cascade_delete_huurder_posts' ), 10, 2 );
+    }
+
+    /**
+     * When a struijck_huurder term is deleted, permanently delete every
+     * activity that was assigned to it.
+     */
+    public static function cascade_delete_huurder_posts( $term, $taxonomy ) {
+        if ( 'struijck_huurder' !== $taxonomy ) {
+            return;
+        }
+
+        $post_ids = get_posts( array(
+            'post_type'      => 'struijck_activiteit',
+            'post_status'    => 'any',
+            'numberposts'    => -1,
+            'fields'         => 'ids',
+            'tax_query'      => array(
+                array(
+                    'taxonomy' => 'struijck_huurder',
+                    'field'    => 'term_id',
+                    'terms'    => (int) $term,
+                ),
+            ),
+        ) );
+
+        foreach ( $post_ids as $post_id ) {
+            wp_delete_post( $post_id, true );
+        }
     }
 
     const ALLOW_DOUBLE_META = '_struijck_allow_double';
