@@ -59,15 +59,13 @@ class Struijck_Agenda_REST_API {
             $p = $request->get_params();
         }
 
-        // Spam: honeypot must stay empty.
+        // Spam: honeypot must stay empty. (No WP nonce here on purpose:
+        // full-page caching makes a page-embedded nonce unreliable. The
+        // honeypot, per-IP throttle, strict validation and the fact that
+        // every request lands as 'pending' for manual approval are the
+        // protection instead.)
         if ( ! empty( $p['website'] ) ) {
             return new WP_REST_Response( array( 'success' => true ), 200 );
-        }
-
-        // Nonce.
-        $nonce = isset( $p['nonce'] ) ? $p['nonce'] : '';
-        if ( ! wp_verify_nonce( $nonce, 'struijck_request' ) ) {
-            return new WP_REST_Response( array( 'success' => false, 'message' => 'Beveiligingscontrole mislukt. Herlaad de pagina en probeer opnieuw.' ), 403 );
         }
 
         // Light throttle: max 5 aanvragen per uur per IP.
@@ -157,8 +155,22 @@ class Struijck_Agenda_REST_API {
         $body .= "Tijd: {$start}" . ( $end ? " - {$end}" : '' ) . "\n";
         $body .= "Opmerking: " . ( $opmerking ? $opmerking : '—' ) . "\n\n";
         $body .= "Beoordeel en keur goed:\n{$edit_link}\n";
+
+        // Recipient(s): server-side option set from the widget, never
+        // trusted from the request body. Falls back to the admin e-mail.
+        $configured = get_option( 'struijck_request_email', '' );
+        $recipients = array();
+        foreach ( explode( ',', (string) $configured ) as $addr ) {
+            $addr = trim( $addr );
+            if ( is_email( $addr ) ) {
+                $recipients[] = $addr;
+            }
+        }
+        if ( empty( $recipients ) ) {
+            $recipients[] = get_option( 'admin_email' );
+        }
         wp_mail(
-            get_option( 'admin_email' ),
+            $recipients,
             'Nieuwe agenda-aanvraag: ' . $naam . ' (' . $date . ')',
             $body
         );

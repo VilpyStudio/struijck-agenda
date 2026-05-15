@@ -486,7 +486,7 @@
     background: var(--sa-bg);
     border-radius: var(--sa-radius);
     width: 100%;
-    max-width: 520px;
+    max-width: min(520px, calc(100vw - 24px));
     max-height: 88vh;
     display: flex;
     flex-direction: column;
@@ -528,6 +528,7 @@
 .sa-modal__body {
     padding: 8px 22px 22px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .sa-modal__body .sa-day-row {
@@ -608,6 +609,8 @@
 .struijck-agenda .sa-form select,
 .struijck-agenda .sa-form textarea {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding: 10px 12px;
     border: 1px solid var(--sa-border);
     border-radius: 10px;
@@ -616,6 +619,24 @@
     color: var(--sa-text);
     background: var(--sa-bg);
     box-sizing: border-box;
+}
+
+/* iOS rendert date/time-velden met een eigen breedte die kan
+   overlopen; forceer ze binnen het veld. */
+.struijck-agenda .sa-form input[type="date"],
+.struijck-agenda .sa-form input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+}
+
+.struijck-agenda .sa-form input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+}
+
+.sa-field,
+.sa-field-row {
+    min-width: 0;
 }
 
 .struijck-agenda .sa-form input:focus,

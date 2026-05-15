@@ -96,6 +96,30 @@ class Struijck_Agenda_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
+        $this->add_control(
+            'request_email',
+            array(
+                'label'       => __( 'Aanvragen e-mail ontvanger(s)', 'struijck-agenda' ),
+                'type'        => \Elementor\Controls_Manager::TEXT,
+                'default'     => '',
+                'placeholder' => get_option( 'admin_email' ),
+                'description' => __( 'E-mailadres voor nieuwe aanvragen. Meerdere? Komma-gescheiden. Leeg = WordPress-beheerdersmail.', 'struijck-agenda' ),
+                'condition'   => array( 'requests' => 'yes' ),
+            )
+        );
+
+        $this->add_control(
+            'request_redirect',
+            array(
+                'label'       => __( 'Omleiden na verzenden (URL)', 'struijck-agenda' ),
+                'type'        => \Elementor\Controls_Manager::URL,
+                'options'     => array( 'url' ),
+                'placeholder' => 'https://…',
+                'description' => __( 'Optioneel: stuur de bezoeker hierheen na een gelukte aanvraag (bijv. een bedankt-pagina).', 'struijck-agenda' ),
+                'condition'   => array( 'requests' => 'yes' ),
+            )
+        );
+
         $this->end_controls_section();
 
         /* ===== Style: Kleuren ===== */
@@ -252,12 +276,20 @@ class Struijck_Agenda_Elementor_Widget extends \Elementor\Widget_Base {
 
     protected function render() {
         $settings = $this->get_settings_for_display();
+
+        $redirect = '';
+        if ( ! empty( $settings['request_redirect']['url'] ) ) {
+            $redirect = $settings['request_redirect']['url'];
+        }
+
         $shortcode = sprintf(
-            '[struijck_agenda view="%s" zaal="%s" filters="%s" requests="%s"]',
+            '[struijck_agenda view="%s" zaal="%s" filters="%s" requests="%s" email="%s" redirect="%s"]',
             esc_attr( $settings['view'] ),
             esc_attr( $settings['zaal'] ),
             'yes' === $settings['filters'] ? 'yes' : 'no',
-            ( isset( $settings['requests'] ) && 'yes' === $settings['requests'] ) ? 'yes' : 'no'
+            ( isset( $settings['requests'] ) && 'yes' === $settings['requests'] ) ? 'yes' : 'no',
+            esc_attr( isset( $settings['request_email'] ) ? $settings['request_email'] : '' ),
+            esc_attr( $redirect )
         );
         echo do_shortcode( $shortcode );
     }

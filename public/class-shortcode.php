@@ -36,10 +36,19 @@ class Struijck_Agenda_Shortcode {
             'zaal'     => '',
             'filters'  => 'yes',
             'requests' => 'yes',
+            'email'    => '',
+            'redirect' => '',
         ), $atts, 'struijck_agenda' );
 
         wp_enqueue_style( 'struijck-agenda' );
         wp_enqueue_script( 'struijck-agenda' );
+
+        // Persist the configured recipient server-side (the REST endpoint
+        // trusts this option, not the request body). Only write on change.
+        $email_attr = sanitize_text_field( $atts['email'] );
+        if ( $email_attr && $email_attr !== get_option( 'struijck_request_email', '' ) ) {
+            update_option( 'struijck_request_email', $email_attr );
+        }
 
         $instance_id = 'struijck-agenda-' . wp_unique_id();
 
@@ -52,8 +61,8 @@ class Struijck_Agenda_Shortcode {
         $config = array(
             'restUrl'    => esc_url_raw( rest_url( 'struijck-agenda/v1/occurrences' ) ),
             'requestUrl' => esc_url_raw( rest_url( 'struijck-agenda/v1/request' ) ),
-            'nonce'      => wp_create_nonce( 'struijck_request' ),
             'canRequest' => 'yes' === $atts['requests'],
+            'redirect'   => $atts['redirect'] ? esc_url_raw( $atts['redirect'] ) : '',
             'initialView' => in_array( $atts['view'], array( 'month', 'week', 'list' ), true ) ? $atts['view'] : 'month',
             'lockedZaal' => $atts['zaal'],
             'showFilters' => 'yes' === $atts['filters'] && empty( $atts['zaal'] ),

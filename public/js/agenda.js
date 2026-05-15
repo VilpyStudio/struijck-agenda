@@ -526,7 +526,6 @@
                 msg.textContent = 'Vul naam, e-mail, datum en starttijd in.';
                 return;
             }
-            data.nonce = self.config.nonce;
             var btn = formEl.querySelector('button[type="submit"]');
             btn.disabled = true;
             btn.textContent = 'Versturen…';
@@ -538,6 +537,10 @@
                 .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, j: j }; }); })
                 .then(function(res) {
                     if (res.ok && res.j && res.j.success) {
+                        if (self.config.redirect) {
+                            window.location.href = self.config.redirect;
+                            return;
+                        }
                         wrap.querySelector('.sa-modal__body').innerHTML =
                             '<div class="sa-form__done">' + esc(res.j.message || 'Bedankt! Je aanvraag is verstuurd.') + '</div>';
                     } else {
