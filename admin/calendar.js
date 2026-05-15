@@ -53,7 +53,7 @@
         html += '</div>';
 
         // Grid headers
-        html += '<div class="sc-grid">';
+        html += '<div class="sc-grid-scroll"><div class="sc-grid">';
         i18n.weekdaysShort.forEach(function(w) {
             html += '<div class="sc-grid__header">' + esc(w) + '</div>';
         });
@@ -106,7 +106,7 @@
 
             iter.setDate(iter.getDate() + 1);
         }
-        html += '</div>';
+        html += '</div></div>';
 
         app.innerHTML = html;
         bindToolbar();

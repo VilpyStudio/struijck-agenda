@@ -119,13 +119,10 @@ class Struijck_Agenda_Admin_Calendar {
     public static function render_page() {
         ?>
         <div class="wrap struijck-cal-wrap">
-            <div class="sc-pagehead">
-                <span class="sc-eyebrow"><?php esc_html_e( 'Beheer', 'struijck-agenda' ); ?></span>
-                <h1 class="sc-pagetitle"><?php esc_html_e( 'De planner.', 'struijck-agenda' ); ?></h1>
-                <p class="sc-pageintro">
-                    <?php esc_html_e( 'Klik op een dag om een boeking toe te voegen of te bewerken.', 'struijck-agenda' ); ?>
-                </p>
-            </div>
+            <h1 class="struijck-cal-pagetitle"><?php esc_html_e( 'Agenda planner', 'struijck-agenda' ); ?></h1>
+            <p class="struijck-cal-intro">
+                <?php esc_html_e( 'Klik op een dag om een boeking toe te voegen of te bewerken.', 'struijck-agenda' ); ?>
+            </p>
 
             <div id="struijck-calendar-app">
                 <div class="struijck-cal-loading"><?php esc_html_e( 'Bezig met laden…', 'struijck-agenda' ); ?></div>
