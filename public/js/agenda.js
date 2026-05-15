@@ -75,17 +75,29 @@
     };
 
     P.fetchAndRender = function() {
-        this.root.innerHTML = '<div class="struijck-agenda__loading">' + esc(this.i18n.loading) + '</div>';
         var self = this;
+        // First load shows the placeholder; later loads keep the current
+        // content (just dimmed) so the page doesn't collapse and jump.
+        if (!this._loaded) {
+            this.root.innerHTML = '<div class="struijck-agenda__loading">' + esc(this.i18n.loading) + '</div>';
+        } else {
+            this.root.classList.add('is-refetching');
+        }
         var r = this.range();
         var url = this.config.restUrl + '?start=' + ymd(r.start) + '&end=' + ymd(r.end);
         if (this.currentZaal && this.currentZaal !== 'all') {
             url += '&zaal=' + encodeURIComponent(this.currentZaal);
         }
+        var done = function(data) {
+            self.events = Array.isArray(data) ? data : [];
+            self._loaded = true;
+            self.root.classList.remove('is-refetching');
+            self.render();
+        };
         fetch(url, { headers: { 'Accept': 'application/json' } })
             .then(function(res) { return res.json(); })
-            .then(function(data) { self.events = Array.isArray(data) ? data : []; self.render(); })
-            .catch(function() { self.events = []; self.render(); });
+            .then(done)
+            .catch(function() { done([]); });
     };
 
     P.render = function() {
