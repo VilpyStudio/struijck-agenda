@@ -141,25 +141,13 @@
         h += '    <span class="sa-week-eyebrow">' + esc(this.eyebrow()) + '</span>';
         h += '    <span class="sa-week-range">' + esc(this.rangeLabel()) + '</span>';
         h += '  </div>';
-        h += '  <div class="sa-head-right">';
-        h += '    <div class="sa-views" role="tablist">';
-        h += this.viewBtn('week', i.week || 'Week');
-        h += this.viewBtn('month', i.month || 'Maand');
-        h += this.viewBtn('list', i.list || 'Lijst');
-        h += '    </div>';
-        h += '    <div class="sa-nav">';
-        h += '      <button type="button" class="sa-nav-btn" data-action="prev" aria-label="' + esc(i.prev) + '">‹</button>';
-        h += '      <button type="button" class="sa-nav-btn sa-nav-today" data-action="today">' + esc(i.today) + '</button>';
-        h += '      <button type="button" class="sa-nav-btn" data-action="next" aria-label="' + esc(i.next) + '">›</button>';
-        h += '    </div>';
+        h += '  <div class="sa-nav">';
+        h += '    <button type="button" class="sa-nav-btn" data-action="prev" aria-label="' + esc(i.prev) + '">‹</button>';
+        h += '    <button type="button" class="sa-nav-btn sa-nav-today" data-action="today">' + esc(i.today) + '</button>';
+        h += '    <button type="button" class="sa-nav-btn" data-action="next" aria-label="' + esc(i.next) + '">›</button>';
         h += '  </div>';
         h += '</div>';
         return h;
-    };
-
-    P.viewBtn = function(view, label) {
-        var active = this.view === view ? ' sa-view-btn--active' : '';
-        return '<button type="button" class="sa-view-btn' + active + '" data-view="' + view + '">' + esc(label) + '</button>';
     };
 
     P.renderFilters = function() {
@@ -244,7 +232,7 @@
             var cls = 'sa-mday';
             if (it.getMonth() !== curMonth) cls += ' sa-mday--other';
             if (dStr === todayStr) cls += ' sa-mday--today';
-            h += '<div class="' + cls + '" data-goto="' + dStr + '">';
+            h += '<div class="' + cls + '">';
             h += '<span class="sa-mday__num">' + it.getDate() + '</span>';
             var ev = this.eventsOn(dStr);
             ev.slice(0, 3).forEach(function(e) {
@@ -298,13 +286,6 @@
                 self.fetchAndRender();
             });
         });
-        this.root.querySelectorAll('[data-view]').forEach(function(b) {
-            b.addEventListener('click', function() {
-                if (self.view === b.dataset.view) return;
-                self.view = b.dataset.view;
-                self.fetchAndRender();
-            });
-        });
         this.root.querySelectorAll('[data-day-offset]').forEach(function(t) {
             t.addEventListener('click', function() {
                 self.activeDayOffset = parseInt(t.dataset.dayOffset, 10);
@@ -314,15 +295,6 @@
         this.root.querySelectorAll('[data-zaal]').forEach(function(b) {
             b.addEventListener('click', function() {
                 self.currentZaal = b.dataset.zaal;
-                self.fetchAndRender();
-            });
-        });
-        this.root.querySelectorAll('[data-goto]').forEach(function(c) {
-            c.addEventListener('click', function() {
-                var p = c.dataset.goto.split('-');
-                self.anchor = new Date(+p[0], +p[1] - 1, +p[2]);
-                self.activeDayOffset = (self.anchor.getDay() + 6) % 7;
-                self.view = 'week';
                 self.fetchAndRender();
             });
         });

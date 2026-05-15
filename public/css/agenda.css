@@ -31,22 +31,15 @@
     box-sizing: border-box;
 }
 
-/* Neutralise the host theme's button styling — including hover/focus/active,
-   which themes often colour. Higher specificity than a bare `button:hover`
-   so the theme can't bleed through (the orange blob). */
-.struijck-agenda button,
-.struijck-agenda button:hover,
-.struijck-agenda button:focus,
-.struijck-agenda button:active {
+/* Neutralise the host theme's base button styling. */
+.struijck-agenda button {
     -webkit-appearance: none;
     appearance: none;
     margin: 0;
     padding: 0;
     background: none;
-    background-color: transparent;
     border: none;
     box-shadow: none;
-    outline: none;
     font: inherit;
     color: inherit;
     text-align: inherit;
@@ -56,7 +49,18 @@
     border-radius: 0;
     cursor: pointer;
     width: auto;
-    transition: none;
+}
+
+/* On hover/focus/active only kill the theme's colour/shadow — NOT layout
+   (padding, radius), so our pills keep their shape. Higher specificity
+   than a bare `button:hover` so the theme can't bleed through; our own
+   component :hover rules (.struijck-agenda .sa-*:hover) outrank this. */
+.struijck-agenda button:hover,
+.struijck-agenda button:focus,
+.struijck-agenda button:active {
+    background: none;
+    background-color: transparent;
+    box-shadow: none;
 }
 
 .struijck-agenda :focus-visible {
@@ -101,44 +105,8 @@
     text-transform: capitalize;
 }
 
-.sa-head-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* View switcher + nav share a pill style. Selectors are prefixed with
-   .struijck-agenda so they always outrank a theme's `button` rules. */
-.sa-views {
-    display: inline-flex;
-    gap: 6px;
-}
-
-.struijck-agenda .sa-view-btn {
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--sa-text-soft);
-    background: var(--sa-bg);
-    border: 1px solid var(--sa-border);
-    border-radius: var(--sa-radius-sm);
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.struijck-agenda .sa-view-btn:hover {
-    color: var(--sa-accent);
-    border-color: var(--sa-accent);
-    background: var(--sa-accent-soft);
-}
-
-.struijck-agenda .sa-view-btn--active,
-.struijck-agenda .sa-view-btn--active:hover {
-    background: var(--sa-text);
-    color: #fff;
-    border-color: var(--sa-text);
-}
-
+/* Nav buttons. Selectors are prefixed with .struijck-agenda so they
+   always outrank a theme's `button` rules. */
 .sa-nav {
     display: flex;
     gap: 8px;
@@ -413,12 +381,6 @@
     display: flex;
     flex-direction: column;
     gap: 3px;
-    cursor: pointer;
-    transition: background 0.12s ease;
-}
-
-.sa-mday:hover {
-    background: var(--sa-bg-soft);
 }
 
 .sa-mday--other {
@@ -469,54 +431,72 @@
 @media (max-width: 768px) {
     .sa-week-head {
         align-items: flex-start;
-        gap: 14px;
+        gap: 10px;
+        margin-bottom: 16px;
     }
-    .sa-head-right {
+    .sa-week-range {
+        font-size: 0.95rem;
+    }
+    .sa-nav {
         width: 100%;
         justify-content: space-between;
     }
-    .sa-views {
+    .struijck-agenda .sa-nav-btn {
+        height: 38px;
         flex: 1;
-    }
-    .struijck-agenda .sa-view-btn {
-        flex: 1;
-        text-align: center;
-        padding: 10px 6px;
     }
 
     .sa-filters {
         gap: 6px;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
     .struijck-agenda .sa-filter-pill {
-        padding: 9px 15px;
+        padding: 7px 13px;
+        font-size: 0.8rem;
     }
 
-    /* WEEK: tabs verbergen, hele week verticaal tonen. */
+    /* WEEK: tabs verbergen, hele week compact verticaal tonen. */
     .sa-tabs,
     .sa-day-content {
         display: none;
     }
     .sa-week-agenda {
         display: block;
+        padding: 2px 16px 16px;
+    }
+    .sa-wa-date,
+    .sa-list__date {
+        font-size: 0.82rem;
+        padding: 14px 0 4px;
+    }
+    .sa-wa-empty {
+        padding: 7px 0;
+        font-size: 0.8rem;
     }
 
-    /* LIST blijft verticaal. */
     .sa-list {
-        padding: 4px 18px 20px;
+        padding: 2px 16px 16px;
     }
     .sa-day-row,
     .sa-list .sa-day-row,
     .sa-week-agenda .sa-day-row {
-        grid-template-columns: 72px 1fr;
-        gap: 14px;
-        padding: 14px 0;
+        grid-template-columns: 56px 1fr;
+        gap: 12px;
+        padding: 9px 0;
     }
     .sa-day-row__time {
-        font-size: 1.05rem;
+        font-size: 0.95rem;
+    }
+    .sa-day-row__time-end {
+        font-size: 0.72rem;
+        margin-top: 1px;
     }
     .sa-day-row__title {
-        font-size: 1rem;
+        font-size: 0.92rem;
+    }
+    .sa-day-row__zaal {
+        font-size: 0.78rem;
+        margin-top: 1px;
     }
 
     /* MAAND: past op schermbreedte, boekingen als stipjes (geen scroll). */
@@ -568,10 +548,14 @@
     .sa-day-row,
     .sa-list .sa-day-row,
     .sa-week-agenda .sa-day-row {
-        grid-template-columns: 62px 1fr;
-        gap: 12px;
+        grid-template-columns: 50px 1fr;
+        gap: 10px;
+        padding: 8px 0;
     }
     .sa-day-row__time {
-        font-size: 1rem;
+        font-size: 0.9rem;
+    }
+    .sa-day-row__title {
+        font-size: 0.88rem;
     }
 }
