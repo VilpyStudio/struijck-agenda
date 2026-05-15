@@ -20,22 +20,11 @@ Custom WordPress plugin voor agendabeheer van sporthal De Struijck. Gemaakt voor
 2. WordPress admin → Plugins → Nieuwe plugin → Plugin uploaden → kies de zip → Installeren → Activeren
 3. In de admin sidebar verschijnt **Agenda**
 
-## Automatische updates (privé GitHub-repo)
+## Automatische updates
 
 De plugin controleert zelf GitHub Releases van `VilpyStudio/struijck-agenda` en
-toont updates in **WordPress → Plugins** net als elke andere plugin.
-
-Omdat de repo **privé** is, heeft de site een GitHub access token nodig met
-leesrechten op deze repo. Zet dit in `wp-config.php` (boven `/* That's all,
-stop editing! */`):
-
-```php
-define( 'STRUIJCK_AGENDA_GITHUB_TOKEN', 'github_pat_xxxxxxxx' );
-```
-
-Gebruik bij voorkeur een **fine-grained token** met alleen
-`Contents: Read-only` op de repo `VilpyStudio/struijck-agenda`. Zonder geldig
-token verschijnen er geen updates (de plugin blijft gewoon werken).
+toont updates in **WordPress → Plugins** net als elke andere plugin. De repo is
+publiek, dus dit werkt out of the box — geen token of configuratie nodig.
 
 Een nieuwe versie uitbrengen:
 

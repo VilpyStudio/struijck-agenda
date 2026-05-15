@@ -1,14 +1,8 @@
 <?php
 /**
- * Lightweight self-updater that pulls releases from a (private) GitHub repo.
- *
- * For a PRIVATE repository the site must provide a GitHub access token with
- * read access to the repo. Set it in wp-config.php:
- *
- *     define( 'STRUIJCK_AGENDA_GITHUB_TOKEN', 'github_pat_xxx' );
- *
- * (a fine-grained token with "Contents: read" on this single repo is enough),
- * or supply it dynamically via the `struijck_agenda_github_token` filter.
+ * Lightweight self-updater that pulls releases from the public GitHub repo
+ * and surfaces them on the WordPress plugins screen. No configuration or
+ * token required.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +22,6 @@ class Struijck_Agenda_GitHub_Updater {
 
         add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'check_update' ) );
         add_filter( 'plugins_api', array( __CLASS__, 'plugin_info' ), 10, 3 );
-        add_filter( 'http_request_args', array( __CLASS__, 'authorize_download' ), 10, 2 );
         add_filter( 'upgrader_source_selection', array( __CLASS__, 'fix_source_dir' ), 10, 4 );
         add_action( 'upgrader_process_complete', array( __CLASS__, 'flush_cache' ), 10, 2 );
     }
@@ -36,12 +29,6 @@ class Struijck_Agenda_GitHub_Updater {
     /** owner/repo, e.g. "VilpyStudio/struijck-agenda". */
     private static function repo() {
         return defined( 'STRUIJCK_AGENDA_GITHUB_REPO' ) ? STRUIJCK_AGENDA_GITHUB_REPO : '';
-    }
-
-    /** Access token for private repos. Empty string = unauthenticated (public only). */
-    private static function token() {
-        $token = defined( 'STRUIJCK_AGENDA_GITHUB_TOKEN' ) ? STRUIJCK_AGENDA_GITHUB_TOKEN : '';
-        return (string) apply_filters( 'struijck_agenda_github_token', $token );
     }
 
     private static function plugin_basename() {
@@ -64,23 +51,15 @@ class Struijck_Agenda_GitHub_Updater {
         }
 
         $url      = 'https://api.github.com/repos/' . self::repo() . '/releases/latest';
-        $headers  = array(
-            'Accept'               => 'application/vnd.github+json',
-            'X-GitHub-Api-Version' => '2022-11-28',
-        );
-        $token = self::token();
-        if ( $token ) {
-            $headers['Authorization'] = 'Bearer ' . $token;
-        }
-
         $response = wp_remote_get( $url, array(
             'timeout' => 15,
-            'headers' => $headers,
+            'headers' => array(
+                'Accept'               => 'application/vnd.github+json',
+                'X-GitHub-Api-Version' => '2022-11-28',
+            ),
         ) );
 
         if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-            // Cache the failure briefly so a private repo without a token
-            // doesn't hammer the API on every update check.
             set_site_transient( self::TRANSIENT, 'none', HOUR_IN_SECONDS );
             return null;
         }
@@ -95,9 +74,7 @@ class Struijck_Agenda_GitHub_Updater {
         if ( ! empty( $body['assets'] ) && is_array( $body['assets'] ) ) {
             foreach ( $body['assets'] as $asset ) {
                 if ( isset( $asset['name'] ) && self::ASSET_NAME === $asset['name'] ) {
-                    // Use the API asset URL (works for private repos with auth),
-                    // not browser_download_url which 404s without a session.
-                    $package = $asset['url'];
+                    $package = $asset['browser_download_url'];
                     break;
                 }
             }
@@ -179,33 +156,6 @@ class Struijck_Agenda_GitHub_Updater {
                 'changelog' => $release['body'] ? wpautop( esc_html( $release['body'] ) ) : __( 'Zie GitHub releases.', 'struijck-agenda' ),
             ),
         );
-    }
-
-    /**
-     * Attach the auth + octet-stream headers when downloading a private
-     * release asset from the GitHub API. The header is scoped to the
-     * api.github.com asset URL only, so it is NOT forwarded to the signed
-     * S3 redirect target (which would otherwise reject the request).
-     */
-    public static function authorize_download( $args, $url ) {
-        $prefix = 'https://api.github.com/repos/' . self::repo() . '/';
-        if ( 0 !== strpos( $url, $prefix ) ) {
-            return $args;
-        }
-        if ( false === strpos( $url, '/releases/assets/' ) && false === strpos( $url, '/zipball/' ) ) {
-            return $args;
-        }
-
-        $token = self::token();
-        if ( ! isset( $args['headers'] ) || ! is_array( $args['headers'] ) ) {
-            $args['headers'] = array();
-        }
-        $args['headers']['Accept'] = 'application/octet-stream';
-        if ( $token ) {
-            $args['headers']['Authorization'] = 'Bearer ' . $token;
-        }
-
-        return $args;
     }
 
     /**
