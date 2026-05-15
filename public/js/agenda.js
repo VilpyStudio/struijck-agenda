@@ -160,6 +160,13 @@
 
         this.root.innerHTML = html;
         this.bindEvents();
+
+        // Keep the active day visible when the tabs scroll horizontally (mobile).
+        var tabs = this.root.querySelector('.sa-tabs');
+        var activeTab = this.root.querySelector('.sa-tab--active');
+        if (tabs && activeTab && tabs.scrollWidth > tabs.clientWidth && activeTab.scrollIntoView) {
+            activeTab.scrollIntoView({ block: 'nearest', inline: 'center' });
+        }
     };
 
     StruijckAgenda.prototype.getWeekLabel = function() {

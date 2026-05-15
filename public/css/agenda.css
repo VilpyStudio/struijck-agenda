@@ -1,6 +1,7 @@
 /* ==========================================================================
    Struijck Agenda — Frontend Weekoverzicht
-   Geïnspireerd op het rooster design (Het rooster).
+   Design system: crème / teal / warm oranje.
+   Alle kleuren/afrondingen via --sa-* zodat de Elementor Style-tab werkt.
    ========================================================================== */
 
 .struijck-agenda {
@@ -9,10 +10,15 @@
     --sa-accent: #e8643c;
     --sa-bg: #ffffff;
     --sa-bg-soft: #faf3eb;
-    --sa-border: #e5e7eb;
+    --sa-border: #ece3d6;
     --sa-time-color: #1a3d3a;
-    --sa-radius: 16px;
-    --sa-radius-sm: 8px;
+    --sa-radius: 18px;
+    --sa-radius-sm: 999px;
+
+    /* Afgeleide tint: volgt automatisch de accentkleur uit Elementor. */
+    --sa-accent-soft: rgba(232, 100, 60, 0.10);
+    --sa-accent-soft: color-mix(in srgb, var(--sa-accent) 12%, transparent);
+    --sa-shadow: 0 1px 2px rgba(26, 61, 58, 0.04), 0 14px 34px rgba(26, 61, 58, 0.07);
 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--sa-text);
@@ -26,8 +32,14 @@
     box-sizing: border-box;
 }
 
+.struijck-agenda :focus-visible {
+    outline: 2px solid var(--sa-accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
 .struijck-agenda__loading {
-    padding: 60px 20px;
+    padding: 64px 20px;
     text-align: center;
     color: var(--sa-text-soft);
 }
@@ -35,10 +47,10 @@
 /* ===== Header / week label ===== */
 .sa-week-head {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 16px 24px;
+    margin-bottom: 22px;
     flex-wrap: wrap;
 }
 
@@ -50,49 +62,56 @@
 .sa-week-eyebrow {
     text-transform: uppercase;
     color: var(--sa-accent);
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin-bottom: 2px;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    margin-bottom: 3px;
 }
 
 .sa-week-range {
-    font-size: 1rem;
+    font-size: 1.05rem;
     color: var(--sa-text-soft);
 }
 
 .sa-nav {
     display: flex;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .sa-nav-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    height: 42px;
+    min-width: 42px;
+    padding: 0;
+    border-radius: var(--sa-radius-sm);
     border: 1px solid var(--sa-border);
     background: var(--sa-bg);
     color: var(--sa-text);
-    font-size: 1rem;
+    font-size: 1.05rem;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-family: inherit;
+    line-height: 1;
 }
 
 .sa-nav-btn:hover {
     border-color: var(--sa-accent);
     color: var(--sa-accent);
+    background: var(--sa-accent-soft);
+}
+
+.sa-nav-btn:active {
+    transform: translateY(1px);
 }
 
 .sa-nav-today {
-    padding: 0 18px;
-    width: auto;
-    border-radius: 999px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    padding: 0 20px;
+    min-width: auto;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
 /* ===== Filters (zaal pills) ===== */
@@ -104,23 +123,26 @@
 }
 
 .sa-filter-pill {
-    padding: 6px 14px;
+    padding: 8px 16px;
     background: var(--sa-bg);
     border: 1px solid var(--sa-border);
-    border-radius: 999px;
-    font-size: 0.8125rem;
+    border-radius: var(--sa-radius-sm);
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.15s ease;
     color: var(--sa-text-soft);
     font-family: inherit;
+    line-height: 1.2;
 }
 
 .sa-filter-pill:hover {
     border-color: var(--sa-accent);
     color: var(--sa-accent);
+    background: var(--sa-accent-soft);
 }
 
-.sa-filter-pill--active {
+.sa-filter-pill--active,
+.sa-filter-pill--active:hover {
     background: var(--sa-text);
     color: #fff;
     border-color: var(--sa-text);
@@ -129,8 +151,9 @@
 /* ===== Week card ===== */
 .sa-week-card {
     background: var(--sa-bg);
+    border: 1px solid var(--sa-border);
     border-radius: var(--sa-radius);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--sa-shadow);
     overflow: hidden;
 }
 
@@ -139,11 +162,11 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     border-bottom: 1px solid var(--sa-border);
-    padding: 12px 0 0;
+    background: var(--sa-bg-soft);
 }
 
 .sa-tab {
-    padding: 14px 8px 16px;
+    padding: 16px 6px 18px;
     text-align: center;
     cursor: pointer;
     border: none;
@@ -151,55 +174,60 @@
     color: var(--sa-text-soft);
     font-family: inherit;
     font-size: 0.95rem;
-    font-weight: 500;
-    transition: color 0.15s ease;
+    font-weight: 600;
+    transition: color 0.15s ease, background 0.15s ease;
     position: relative;
 }
 
 .sa-tab:hover {
     color: var(--sa-text);
+    background: rgba(255, 255, 255, 0.55);
 }
 
 .sa-tab__date {
     display: block;
     font-size: 0.75rem;
     color: var(--sa-text-soft);
-    margin-top: 2px;
-    font-weight: 400;
+    margin-top: 3px;
+    font-weight: 500;
 }
 
 .sa-tab--active {
     color: var(--sa-accent);
-    font-weight: 600;
+    background: var(--sa-bg);
 }
 
 .sa-tab--active::after {
     content: "";
     position: absolute;
     bottom: -1px;
-    left: 25%;
-    right: 25%;
+    left: 22%;
+    right: 22%;
     height: 3px;
     background: var(--sa-accent);
-    border-radius: 2px;
+    border-radius: 3px 3px 0 0;
 }
 
-.sa-tab--today .sa-tab__date {
+.sa-tab--active .sa-tab__date {
     color: var(--sa-accent);
-    font-weight: 600;
+}
+
+.sa-tab--today:not(.sa-tab--active) .sa-tab__date {
+    color: var(--sa-accent);
+    font-weight: 700;
 }
 
 /* ----- Day content ----- */
 .sa-day-content {
-    padding: 12px 32px 28px;
-    min-height: 180px;
+    padding: 8px 32px 24px;
+    min-height: 200px;
 }
 
 .sa-day-row {
     display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: 16px;
-    padding: 18px 0;
+    grid-template-columns: 110px 1fr;
+    gap: 20px;
+    padding: 20px 0;
     align-items: baseline;
     border-bottom: 1px solid var(--sa-border);
 }
@@ -211,32 +239,33 @@
 .sa-day-row__time {
     font-weight: 700;
     color: var(--sa-time-color);
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
 }
 
 .sa-day-row__time-end {
     display: block;
     font-size: 0.8rem;
     color: var(--sa-text-soft);
-    font-weight: 400;
-    margin-top: 2px;
+    font-weight: 500;
+    margin-top: 3px;
 }
 
 .sa-day-row__title {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     color: var(--sa-text);
-    font-weight: 400;
+    font-weight: 600;
 }
 
 .sa-day-row__zaal {
     color: var(--sa-text-soft);
     font-size: 0.875rem;
-    margin-top: 2px;
+    margin-top: 3px;
 }
 
 .sa-day-empty {
-    padding: 40px 0;
+    padding: 56px 0;
     text-align: center;
     color: var(--sa-text-soft);
     font-size: 0.95rem;
@@ -244,31 +273,81 @@
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
-    .sa-tabs {
-        overflow-x: auto;
-        grid-template-columns: repeat(7, minmax(60px, 1fr));
+    .sa-week-head {
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .sa-week-head__left {
+        flex: 1 1 auto;
+    }
+    .sa-week-range {
+        font-size: 0.95rem;
+    }
+    .sa-nav {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .sa-nav-today {
+        flex: 1;
     }
 
+    .sa-filters {
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+    .sa-filter-pill {
+        padding: 9px 15px;
+    }
+
+    /* Dag-tabs als nette horizontale scroll-strip i.p.v. een krap grid. */
+    .sa-tabs {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .sa-tabs::-webkit-scrollbar {
+        display: none;
+    }
     .sa-tab {
-        padding: 12px 4px;
-        font-size: 0.85rem;
+        flex: 0 0 22%;
+        min-width: 76px;
+        scroll-snap-align: center;
+        padding: 14px 6px 16px;
     }
 
     .sa-day-content {
-        padding: 12px 16px 20px;
+        padding: 6px 18px 22px;
+        min-height: 0;
     }
-
     .sa-day-row {
-        grid-template-columns: 80px 1fr;
-        gap: 12px;
-        padding: 14px 0;
+        grid-template-columns: 82px 1fr;
+        gap: 14px;
+        padding: 16px 0;
     }
+    .sa-day-row__time {
+        font-size: 1.1rem;
+    }
+    .sa-day-row__title {
+        font-size: 1rem;
+    }
+    .sa-day-empty {
+        padding: 40px 0;
+    }
+}
 
+@media (max-width: 480px) {
+    .sa-tab {
+        flex-basis: 28%;
+        min-width: 70px;
+        font-size: 0.9rem;
+    }
+    .sa-day-row {
+        grid-template-columns: 70px 1fr;
+        gap: 12px;
+    }
     .sa-day-row__time {
         font-size: 1.05rem;
-    }
-
-    .sa-day-row__title {
-        font-size: 0.95rem;
     }
 }
