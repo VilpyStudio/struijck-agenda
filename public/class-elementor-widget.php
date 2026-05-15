@@ -83,6 +83,19 @@ class Struijck_Agenda_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
+        $this->add_control(
+            'requests',
+            array(
+                'label'        => __( 'Aanvragen toestaan', 'struijck-agenda' ),
+                'type'         => \Elementor\Controls_Manager::SWITCHER,
+                'label_on'     => __( 'Ja', 'struijck-agenda' ),
+                'label_off'    => __( 'Nee', 'struijck-agenda' ),
+                'return_value' => 'yes',
+                'default'      => 'yes',
+                'description'  => __( 'Toont een knop waarmee bezoekers een datum/tijd kunnen aanvragen.', 'struijck-agenda' ),
+            )
+        );
+
         $this->end_controls_section();
 
         /* ===== Style: Kleuren ===== */
@@ -209,10 +222,11 @@ class Struijck_Agenda_Elementor_Widget extends \Elementor\Widget_Base {
     protected function render() {
         $settings = $this->get_settings_for_display();
         $shortcode = sprintf(
-            '[struijck_agenda view="%s" zaal="%s" filters="%s"]',
+            '[struijck_agenda view="%s" zaal="%s" filters="%s" requests="%s"]',
             esc_attr( $settings['view'] ),
             esc_attr( $settings['zaal'] ),
-            'yes' === $settings['filters'] ? 'yes' : 'no'
+            'yes' === $settings['filters'] ? 'yes' : 'no',
+            ( isset( $settings['requests'] ) && 'yes' === $settings['requests'] ) ? 'yes' : 'no'
         );
         echo do_shortcode( $shortcode );
     }

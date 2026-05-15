@@ -32,9 +32,10 @@ class Struijck_Agenda_Shortcode {
 
     public static function render( $atts ) {
         $atts = shortcode_atts( array(
-            'view'    => 'month',
-            'zaal'    => '',
-            'filters' => 'yes',
+            'view'     => 'month',
+            'zaal'     => '',
+            'filters'  => 'yes',
+            'requests' => 'yes',
         ), $atts, 'struijck_agenda' );
 
         wp_enqueue_style( 'struijck-agenda' );
@@ -50,6 +51,9 @@ class Struijck_Agenda_Shortcode {
 
         $config = array(
             'restUrl'    => esc_url_raw( rest_url( 'struijck-agenda/v1/occurrences' ) ),
+            'requestUrl' => esc_url_raw( rest_url( 'struijck-agenda/v1/request' ) ),
+            'nonce'      => wp_create_nonce( 'struijck_request' ),
+            'canRequest' => 'yes' === $atts['requests'],
             'initialView' => in_array( $atts['view'], array( 'month', 'week', 'list' ), true ) ? $atts['view'] : 'month',
             'lockedZaal' => $atts['zaal'],
             'showFilters' => 'yes' === $atts['filters'] && empty( $atts['zaal'] ),

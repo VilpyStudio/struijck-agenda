@@ -21,6 +21,39 @@ class Struijck_Agenda_Post_Types {
 
         // Deleting a huurder also removes all of that huurder's bookings.
         add_action( 'pre_delete_term', array( __CLASS__, 'cascade_delete_huurder_posts' ), 10, 2 );
+
+        // Notice when there are website aanvragen waiting for approval.
+        add_action( 'admin_notices', array( __CLASS__, 'pending_requests_notice' ) );
+    }
+
+    public static function pending_requests_notice() {
+        if ( ! current_user_can( 'edit_posts' ) ) {
+            return;
+        }
+        $q = new WP_Query( array(
+            'post_type'      => 'struijck_activiteit',
+            'post_status'    => 'pending',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => array(
+                array( 'key' => '_struijck_is_request', 'value' => '1' ),
+            ),
+        ) );
+        $n = (int) $q->found_posts;
+        if ( $n < 1 ) {
+            return;
+        }
+        $url = admin_url( 'edit.php?post_status=pending&post_type=struijck_activiteit' );
+        printf(
+            '<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
+            esc_html( sprintf(
+                /* translators: %d: number of requests */
+                _n( 'Er is %d agenda-aanvraag die op goedkeuring wacht.', 'Er zijn %d agenda-aanvragen die op goedkeuring wachten.', $n, 'struijck-agenda' ),
+                $n
+            ) ),
+            esc_url( $url ),
+            esc_html__( 'Bekijk aanvragen', 'struijck-agenda' )
+        );
     }
 
     /**

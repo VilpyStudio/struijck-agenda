@@ -534,6 +534,112 @@
     grid-template-columns: 92px 1fr;
 }
 
+.sa-modal__foot {
+    padding: 16px 22px;
+    border-top: 1px solid var(--sa-border);
+    background: var(--sa-bg-soft);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ===== Request button + form ===== */
+.sa-actions {
+    margin-bottom: 18px;
+}
+
+.struijck-agenda .sa-request-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 22px !important;
+    background: var(--sa-accent) !important;
+    color: #fff !important;
+    border: 1px solid var(--sa-accent) !important;
+    border-radius: var(--sa-radius-sm) !important;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.struijck-agenda .sa-request-btn:hover {
+    background: var(--sa-text) !important;
+    border-color: var(--sa-text) !important;
+    color: #fff !important;
+}
+
+.sa-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 8px;
+}
+
+.sa-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sa-field > span {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--sa-text);
+}
+
+.sa-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.struijck-agenda .sa-form input,
+.struijck-agenda .sa-form select,
+.struijck-agenda .sa-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--sa-border);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 16px; /* geen iOS-zoom */
+    color: var(--sa-text);
+    background: var(--sa-bg);
+    box-sizing: border-box;
+}
+
+.struijck-agenda .sa-form input:focus,
+.struijck-agenda .sa-form select:focus,
+.struijck-agenda .sa-form textarea:focus {
+    outline: none;
+    border-color: var(--sa-accent);
+    box-shadow: 0 0 0 3px var(--sa-accent-soft);
+}
+
+.sa-hp {
+    position: absolute !important;
+    left: -9999px !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+.sa-form__msg {
+    font-size: 0.85rem;
+    padding: 8px 0;
+}
+
+.sa-form__msg--err {
+    color: #b32d2e;
+}
+
+.sa-form__done {
+    padding: 32px 8px;
+    text-align: center;
+    color: var(--sa-text);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
 /* ===== Responsive — geen side-scroll ===== */
 @media (max-width: 768px) {
     .sa-week-head {
@@ -663,6 +769,13 @@
         max-width: 100%;
         max-height: 90vh;
         border-radius: var(--sa-radius) var(--sa-radius) 0 0;
+    }
+    .sa-field-row {
+        grid-template-columns: 1fr;
+    }
+    .struijck-agenda .sa-request-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 

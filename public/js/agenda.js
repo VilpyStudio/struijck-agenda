@@ -103,6 +103,10 @@
     P.render = function() {
         var html = '';
         html += this.renderHead();
+        if (this.config.canRequest) {
+            html += '<div class="sa-actions"><button type="button" class="sa-request-btn" data-request>' +
+                    esc('Datum/tijd aanvragen') + '</button></div>';
+        }
         html += this.renderFilters();
         html += '<div class="sa-week-card">';
         if (this.view === 'week') html += this.renderWeek();
@@ -320,6 +324,9 @@
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
             });
         });
+        this.root.querySelectorAll('[data-request]').forEach(function(b) {
+            b.addEventListener('click', function() { self.openRequest(''); });
+        });
     };
 
     /* Day-detail overlay (month → all bookings of a day, incl. mobile). */
@@ -337,13 +344,90 @@
             ev.forEach(function(e) { body += this.rowHtml(e); }, this);
         }
 
+        var footer = '';
+        if (this.config.canRequest) {
+            footer = '<div class="sa-modal__foot"><button type="button" class="sa-request-btn" data-request-date="' +
+                     esc(dateStr) + '">' + esc('Deze dag aanvragen') + '</button></div>';
+        }
+
+        var self = this;
         var wrap = document.createElement('div');
         wrap.className = 'sa-modal';
         wrap.innerHTML =
             '<div class="sa-modal__box" role="dialog" aria-modal="true">' +
             '<div class="sa-modal__head"><span class="sa-modal__title">' + label + '</span>' +
             '<button type="button" class="sa-modal__close" aria-label="' + esc(this.i18n.close || 'Sluiten') + '">×</button></div>' +
-            '<div class="sa-modal__body">' + body + '</div></div>';
+            '<div class="sa-modal__body">' + body + '</div>' + footer + '</div>';
+        this.root.appendChild(wrap);
+
+        var close = function() {
+            if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+            document.removeEventListener('keydown', onKey);
+        };
+        var onKey = function(e) { if (e.key === 'Escape') close(); };
+        wrap.addEventListener('click', function(e) { if (e.target === wrap) close(); });
+        wrap.querySelector('.sa-modal__close').addEventListener('click', close);
+        var rb = wrap.querySelector('[data-request-date]');
+        if (rb) {
+            rb.addEventListener('click', function() {
+                close();
+                self.openRequest(rb.dataset.requestDate);
+            });
+        }
+        document.addEventListener('keydown', onKey);
+    };
+
+    P.timeOpts = function(selected) {
+        var out = '<option value="">—</option>';
+        for (var mins = 6 * 60; mins <= 23 * 60 + 30; mins += 30) {
+            var hh = Math.floor(mins / 60), mm = mins % 60;
+            var v = (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
+            out += '<option value="' + v + '"' + (v === selected ? ' selected' : '') + '>' + v + '</option>';
+        }
+        return out;
+    };
+
+    /* Public booking-request form. */
+    P.openRequest = function(prefillDate) {
+        var self = this;
+        var zalenOpts = '<option value="">' + esc('Geen voorkeur') + '</option>';
+        (this.config.zalen || []).forEach(function(z) {
+            zalenOpts += '<option value="' + esc(z.slug) + '">' + esc(z.name) + '</option>';
+        });
+
+        var form =
+            '<form class="sa-form" novalidate>' +
+            '<label class="sa-field"><span>Naam / vereniging *</span>' +
+            '<input type="text" name="naam" required></label>' +
+            '<label class="sa-field"><span>E-mailadres *</span>' +
+            '<input type="email" name="email" required></label>' +
+            '<label class="sa-field"><span>Telefoon</span>' +
+            '<input type="tel" name="telefoon"></label>' +
+            '<label class="sa-field"><span>Zaal</span>' +
+            '<select name="zaal">' + zalenOpts + '</select></label>' +
+            '<label class="sa-field"><span>Datum *</span>' +
+            '<input type="date" name="date" required value="' + esc(prefillDate || '') + '"></label>' +
+            '<div class="sa-field-row">' +
+            '<label class="sa-field"><span>Starttijd *</span>' +
+            '<select name="start_time" required>' + this.timeOpts('') + '</select></label>' +
+            '<label class="sa-field"><span>Eindtijd</span>' +
+            '<select name="end_time">' + this.timeOpts('') + '</select></label>' +
+            '</div>' +
+            '<label class="sa-field"><span>Opmerking</span>' +
+            '<textarea name="opmerking" rows="3"></textarea></label>' +
+            '<input type="text" name="website" class="sa-hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+            '<div class="sa-form__msg" hidden></div>' +
+            '<div class="sa-modal__foot">' +
+            '<button type="submit" class="sa-request-btn">' + esc('Aanvraag versturen') + '</button>' +
+            '</div></form>';
+
+        var wrap = document.createElement('div');
+        wrap.className = 'sa-modal';
+        wrap.innerHTML =
+            '<div class="sa-modal__box" role="dialog" aria-modal="true">' +
+            '<div class="sa-modal__head"><span class="sa-modal__title">' + esc('Datum/tijd aanvragen') + '</span>' +
+            '<button type="button" class="sa-modal__close" aria-label="Sluiten">×</button></div>' +
+            '<div class="sa-modal__body">' + form + '</div></div>';
         this.root.appendChild(wrap);
 
         var close = function() {
@@ -354,6 +438,52 @@
         wrap.addEventListener('click', function(e) { if (e.target === wrap) close(); });
         wrap.querySelector('.sa-modal__close').addEventListener('click', close);
         document.addEventListener('keydown', onKey);
+
+        var formEl = wrap.querySelector('.sa-form');
+        var msg = wrap.querySelector('.sa-form__msg');
+        formEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var data = {};
+            ['naam', 'email', 'telefoon', 'zaal', 'date', 'start_time', 'end_time', 'opmerking', 'website'].forEach(function(k) {
+                var el = formEl.querySelector('[name="' + k + '"]');
+                data[k] = el ? el.value : '';
+            });
+            if (!data.naam || !data.email || !data.date || !data.start_time) {
+                msg.hidden = false;
+                msg.className = 'sa-form__msg sa-form__msg--err';
+                msg.textContent = 'Vul naam, e-mail, datum en starttijd in.';
+                return;
+            }
+            data.nonce = self.config.nonce;
+            var btn = formEl.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Versturen…';
+            fetch(self.config.requestUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(data)
+            })
+                .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, j: j }; }); })
+                .then(function(res) {
+                    if (res.ok && res.j && res.j.success) {
+                        wrap.querySelector('.sa-modal__body').innerHTML =
+                            '<div class="sa-form__done">' + esc(res.j.message || 'Bedankt! Je aanvraag is verstuurd.') + '</div>';
+                    } else {
+                        msg.hidden = false;
+                        msg.className = 'sa-form__msg sa-form__msg--err';
+                        msg.textContent = (res.j && res.j.message) || 'Er ging iets mis. Probeer het later opnieuw.';
+                        btn.disabled = false;
+                        btn.textContent = 'Aanvraag versturen';
+                    }
+                })
+                .catch(function() {
+                    msg.hidden = false;
+                    msg.className = 'sa-form__msg sa-form__msg--err';
+                    msg.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
+                    btn.disabled = false;
+                    btn.textContent = 'Aanvraag versturen';
+                });
+        });
     };
 
     /* Helpers */
