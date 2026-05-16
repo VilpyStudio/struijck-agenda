@@ -105,6 +105,44 @@
     text-transform: capitalize;
 }
 
+.sa-head-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Compacte Week/Maand-schakelaar. */
+.sa-switch {
+    display: inline-flex;
+    border: 1px solid var(--sa-border);
+    border-radius: var(--sa-radius-sm);
+    overflow: hidden;
+    background: var(--sa-bg);
+}
+
+.struijck-agenda .sa-switch__btn {
+    padding: 8px 14px !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--sa-text-soft) !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.struijck-agenda .sa-switch__btn:hover {
+    color: var(--sa-accent) !important;
+    background: var(--sa-accent-soft) !important;
+}
+
+.struijck-agenda .sa-switch__btn.is-active,
+.struijck-agenda .sa-switch__btn.is-active:hover {
+    background: var(--sa-text) !important;
+    color: #fff !important;
+}
+
 /* Nav buttons. Selectors are prefixed with .struijck-agenda so they
    always outrank a theme's `button` rules. */
 .sa-nav {
@@ -622,12 +660,16 @@
 }
 
 /* iOS rendert date/time-velden met een eigen breedte die kan
-   overlopen; forceer ze binnen het veld. */
+   overlopen. NIET appearance:none gebruiken (dan verdwijnt de native
+   picker en blijft een leeg streepje over) — alleen netjes inperken. */
 .struijck-agenda .sa-form input[type="date"],
 .struijck-agenda .sa-form input[type="time"] {
-    -webkit-appearance: none;
-    appearance: none;
     display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
 }
 
 .struijck-agenda .sa-form input[type="date"]::-webkit-date-and-time-value {
@@ -683,8 +725,19 @@
     .sa-week-range {
         font-size: 0.95rem;
     }
-    .sa-nav {
+    .sa-head-right {
         width: 100%;
+        gap: 8px;
+    }
+    .sa-switch {
+        flex: 1;
+    }
+    .struijck-agenda .sa-switch__btn {
+        flex: 1;
+        text-align: center;
+    }
+    .sa-nav {
+        flex: 1 1 100%;
         justify-content: space-between;
     }
     .struijck-agenda .sa-nav-btn {

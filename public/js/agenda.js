@@ -157,10 +157,18 @@
         h += '    <span class="sa-week-eyebrow">' + esc(this.eyebrow()) + '</span>';
         h += '    <span class="sa-week-range">' + esc(this.rangeLabel()) + '</span>';
         h += '  </div>';
-        h += '  <div class="sa-nav">';
-        h += '    <button type="button" class="sa-nav-btn" data-action="prev" aria-label="' + esc(i.prev) + '">‹</button>';
-        h += '    <button type="button" class="sa-nav-btn sa-nav-today" data-action="today">' + esc(i.today) + '</button>';
-        h += '    <button type="button" class="sa-nav-btn" data-action="next" aria-label="' + esc(i.next) + '">›</button>';
+        h += '  <div class="sa-head-right">';
+        if (this.view === 'week' || this.view === 'month') {
+            h += '    <div class="sa-switch">';
+            h += '      <button type="button" class="sa-switch__btn' + (this.view === 'week' ? ' is-active' : '') + '" data-setview="week">' + esc(i.week || 'Week') + '</button>';
+            h += '      <button type="button" class="sa-switch__btn' + (this.view === 'month' ? ' is-active' : '') + '" data-setview="month">' + esc(i.month || 'Maand') + '</button>';
+            h += '    </div>';
+        }
+        h += '    <div class="sa-nav">';
+        h += '      <button type="button" class="sa-nav-btn" data-action="prev" aria-label="' + esc(i.prev) + '">‹</button>';
+        h += '      <button type="button" class="sa-nav-btn sa-nav-today" data-action="today">' + esc(i.today) + '</button>';
+        h += '      <button type="button" class="sa-nav-btn" data-action="next" aria-label="' + esc(i.next) + '">›</button>';
+        h += '    </div>';
         h += '  </div>';
         h += '</div>';
         return h;
@@ -314,6 +322,13 @@
         this.root.querySelectorAll('[data-zaal]').forEach(function(b) {
             b.addEventListener('click', function() {
                 self.currentZaal = b.dataset.zaal;
+                self.fetchAndRender();
+            });
+        });
+        this.root.querySelectorAll('[data-setview]').forEach(function(b) {
+            b.addEventListener('click', function() {
+                if (self.view === b.dataset.setview) return;
+                self.view = b.dataset.setview;
                 self.fetchAndRender();
             });
         });
