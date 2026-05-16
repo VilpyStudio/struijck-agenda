@@ -159,10 +159,11 @@
         h += '  </div>';
         h += '  <div class="sa-head-right">';
         if (this.view === 'week' || this.view === 'month') {
-            h += '    <div class="sa-switch">';
-            h += '      <button type="button" class="sa-switch__btn' + (this.view === 'week' ? ' is-active' : '') + '" data-setview="week">' + esc(i.week || 'Week') + '</button>';
-            h += '      <button type="button" class="sa-switch__btn' + (this.view === 'month' ? ' is-active' : '') + '" data-setview="month">' + esc(i.month || 'Maand') + '</button>';
-            h += '    </div>';
+            var to = this.view === 'week' ? 'month' : 'week';
+            var toLabel = to === 'month' ? (i.month || 'Maand') : (i.week || 'Week');
+            h += '    <button type="button" class="sa-viewtoggle" data-setview="' + to + '" ' +
+                 'aria-label="' + esc('Wissel naar ' + toLabel.toLowerCase() + 'weergave') + '">' +
+                 '<span class="sa-viewtoggle__ic" aria-hidden="true">⇆</span> ' + esc(toLabel) + '</button>';
         }
         h += '    <div class="sa-nav">';
         h += '      <button type="button" class="sa-nav-btn" data-action="prev" aria-label="' + esc(i.prev) + '">‹</button>';
