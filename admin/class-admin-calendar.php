@@ -99,6 +99,7 @@ class Struijck_Agenda_Admin_Calendar {
                 'noZalen'       => 'Nog geen zalen. Voeg er eerst eentje toe →',
                 'startTime'     => 'Starttijd',
                 'endTime'       => 'Eindtijd',
+                'allDay'        => 'Hele dag',
                 'recurring'     => 'Komt elke week terug',
                 'recurUntil'    => 'Herhalen tot en met',
                 'notes'         => 'Notities (alleen intern)',
@@ -165,16 +166,22 @@ class Struijck_Agenda_Admin_Calendar {
         $date        = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
         $start_time  = isset( $_POST['start_time'] ) ? sanitize_text_field( wp_unslash( $_POST['start_time'] ) ) : '';
         $end_time    = isset( $_POST['end_time'] ) ? sanitize_text_field( wp_unslash( $_POST['end_time'] ) ) : '';
+        $all_day     = ! empty( $_POST['all_day'] );
         $zaal_id     = isset( $_POST['zaal_id'] ) ? (int) $_POST['zaal_id'] : 0;
         $recurring   = ! empty( $_POST['recurring'] );
         $recur_until = isset( $_POST['recur_until'] ) ? sanitize_text_field( wp_unslash( $_POST['recur_until'] ) ) : '';
         $notes       = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
 
-        if ( ! $title || ! $date || ! $start_time ) {
-            wp_send_json_error( 'Vul minimaal titel, datum en starttijd in' );
+        if ( $all_day ) {
+            $start_time = '';
+            $end_time   = '';
         }
 
-        if ( $end_time && self::to_min( $end_time ) <= self::to_min( $start_time ) ) {
+        if ( ! $title || ! $date || ( ! $all_day && ! $start_time ) ) {
+            wp_send_json_error( 'Vul minimaal titel, datum en starttijd in (of kies "Hele dag")' );
+        }
+
+        if ( ! $all_day && $end_time && self::to_min( $end_time ) <= self::to_min( $start_time ) ) {
             wp_send_json_error( 'De eindtijd moet na de starttijd liggen.' );
         }
 
@@ -183,7 +190,7 @@ class Struijck_Agenda_Admin_Calendar {
         if ( $zaal_id ) {
             $allow_double = '1' === get_term_meta( $zaal_id, Struijck_Agenda_Post_Types::ALLOW_DOUBLE_META, true );
             if ( ! $allow_double ) {
-                $conflict = self::find_conflict( $id, $zaal_id, $date, $start_time, $end_time, $recurring, $recur_until );
+                $conflict = self::find_conflict( $id, $zaal_id, $date, $start_time, $end_time, $all_day, $recurring, $recur_until );
                 if ( $conflict ) {
                     wp_send_json_error( $conflict );
                 }
@@ -212,6 +219,7 @@ class Struijck_Agenda_Admin_Calendar {
         update_post_meta( $post_id, '_struijck_start_date', $date );
         update_post_meta( $post_id, '_struijck_start_time', $start_time );
         update_post_meta( $post_id, '_struijck_end_time', $end_time );
+        update_post_meta( $post_id, '_struijck_all_day', $all_day ? 'yes' : '' );
 
         if ( $recurring ) {
             update_post_meta( $post_id, '_struijck_recurring', 'yes' );
@@ -265,7 +273,7 @@ class Struijck_Agenda_Admin_Calendar {
      * Check whether a (possibly recurring) booking overlaps an existing one
      * in the same zaal. Returns a human-readable message on conflict, or ''.
      */
-    protected static function find_conflict( $current_id, $zaal_id, $date, $start_time, $end_time, $recurring, $recur_until ) {
+    protected static function find_conflict( $current_id, $zaal_id, $date, $start_time, $end_time, $all_day, $recurring, $recur_until ) {
         $dates = self::booking_dates( $date, $recurring, $recur_until );
         if ( empty( $dates ) ) {
             return '';
@@ -284,8 +292,7 @@ class Struijck_Agenda_Admin_Calendar {
             ),
         ) );
 
-        $new_start = self::to_min( $start_time );
-        $new_end   = self::to_min( $end_time ? $end_time : $start_time );
+        list( $new_start, $new_end ) = Struijck_Agenda_Meta_Fields::minute_range( $start_time, $end_time, $all_day );
         $zaal_term = get_term( $zaal_id, 'struijck_zaal' );
         $zaal_name = ( $zaal_term && ! is_wp_error( $zaal_term ) ) ? $zaal_term->name : 'deze zaal';
 
@@ -296,16 +303,19 @@ class Struijck_Agenda_Admin_Calendar {
             if ( ! isset( $date_set[ $o['date'] ] ) ) {
                 continue;
             }
-            $o_start = self::to_min( $o['start_time'] );
-            $o_end   = self::to_min( ! empty( $o['end_time'] ) ? $o['end_time'] : $o['start_time'] );
+            list( $o_start, $o_end ) = Struijck_Agenda_Meta_Fields::minute_range( $o['start_time'], $o['end_time'], ! empty( $o['all_day'] ) );
 
             if ( self::times_overlap( $new_start, $new_end, $o_start, $o_end ) ) {
-                $range = substr( (string) $o['start_time'], 0, 5 );
-                if ( ! empty( $o['end_time'] ) ) {
-                    $range .= '–' . substr( (string) $o['end_time'], 0, 5 );
+                if ( ! empty( $o['all_day'] ) ) {
+                    $range = 'de hele dag';
+                } else {
+                    $range = 'om ' . substr( (string) $o['start_time'], 0, 5 );
+                    if ( ! empty( $o['end_time'] ) ) {
+                        $range .= '–' . substr( (string) $o['end_time'], 0, 5 );
+                    }
                 }
                 return sprintf(
-                    'Dubbele boeking: "%1$s" staat op %2$s al om %3$s in %4$s. De %4$s kan maar één keer per tijdstip verhuurd worden.',
+                    'Dubbele boeking: "%1$s" staat op %2$s al %3$s in %4$s. De %4$s kan maar één keer per tijdstip verhuurd worden.',
                     $o['title'],
                     $o['date'],
                     $range,

@@ -319,6 +319,11 @@
     font-variant-numeric: tabular-nums;
 }
 
+.struijck-agenda .sa-day-row__time.sa-day-row__time--allday {
+    font-size: 0.85em;
+    line-height: 1.25;
+}
+
 .sa-day-row__time-end {
     display: block;
     font-size: 0.78rem;

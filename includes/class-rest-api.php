@@ -107,14 +107,15 @@ class Struijck_Agenda_REST_API {
                 $ns = self::to_min( $start );
                 $ne = self::to_min( $end ? $end : $start );
                 foreach ( $occ as $o ) {
-                    $os = self::to_min( $o['start_time'] );
-                    $oe = self::to_min( ! empty( $o['end_time'] ) ? $o['end_time'] : $o['start_time'] );
+                    list( $os, $oe ) = Struijck_Agenda_Meta_Fields::minute_range( $o['start_time'], $o['end_time'], ! empty( $o['all_day'] ) );
                     $a_e = $ne <= $ns ? $ns : $ne;
                     $b_e = $oe <= $os ? $os : $oe;
                     if ( $ns === $os || ( $ns < $b_e && $os < $a_e ) ) {
                         return new WP_REST_Response( array(
                             'success' => false,
-                            'message' => sprintf( 'Helaas, %s is op %s rond die tijd al bezet. Kies een ander tijdslot.', $zaal_term->name, $date ),
+                            'message' => ! empty( $o['all_day'] )
+                                ? sprintf( 'Helaas, %s is op %s de hele dag bezet. Kies een andere datum.', $zaal_term->name, $date )
+                                : sprintf( 'Helaas, %s is op %s rond die tijd al bezet. Kies een ander tijdslot.', $zaal_term->name, $date ),
                         ), 409 );
                     }
                 }

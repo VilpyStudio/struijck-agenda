@@ -83,6 +83,7 @@ class Struijck_Agenda_Admin {
         $start_date = get_post_meta( $post->ID, '_struijck_start_date', true );
         $start_time = get_post_meta( $post->ID, '_struijck_start_time', true );
         $end_time   = get_post_meta( $post->ID, '_struijck_end_time', true );
+        $all_day    = 'yes' === get_post_meta( $post->ID, '_struijck_all_day', true );
         ?>
         <div class="struijck-meta-grid">
             <p>
@@ -90,10 +91,16 @@ class Struijck_Agenda_Admin {
                 <input type="date" id="struijck_start_date" name="struijck_start_date" value="<?php echo esc_attr( $start_date ); ?>" required>
             </p>
             <p>
-                <label for="struijck_start_time"><strong><?php esc_html_e( 'Starttijd', 'struijck-agenda' ); ?></strong></label><br>
-                <input type="time" id="struijck_start_time" name="struijck_start_time" value="<?php echo esc_attr( $start_time ); ?>" required>
+                <label>
+                    <input type="checkbox" id="struijck_all_day" name="struijck_all_day" value="yes" <?php checked( $all_day ); ?>>
+                    <strong><?php esc_html_e( 'Hele dag', 'struijck-agenda' ); ?></strong>
+                </label>
             </p>
-            <p>
+            <p class="struijck-time-field">
+                <label for="struijck_start_time"><strong><?php esc_html_e( 'Starttijd', 'struijck-agenda' ); ?></strong></label><br>
+                <input type="time" id="struijck_start_time" name="struijck_start_time" value="<?php echo esc_attr( $start_time ); ?>" <?php echo $all_day ? '' : 'required'; ?>>
+            </p>
+            <p class="struijck-time-field">
                 <label for="struijck_end_time"><strong><?php esc_html_e( 'Eindtijd', 'struijck-agenda' ); ?></strong></label><br>
                 <input type="time" id="struijck_end_time" name="struijck_end_time" value="<?php echo esc_attr( $end_time ); ?>">
             </p>
@@ -200,6 +207,7 @@ class Struijck_Agenda_Admin {
             '_struijck_start_date'      => isset( $_POST['struijck_start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['struijck_start_date'] ) ) : '',
             '_struijck_start_time'      => isset( $_POST['struijck_start_time'] ) ? sanitize_text_field( wp_unslash( $_POST['struijck_start_time'] ) ) : '',
             '_struijck_end_time'        => isset( $_POST['struijck_end_time'] ) ? sanitize_text_field( wp_unslash( $_POST['struijck_end_time'] ) ) : '',
+            '_struijck_all_day'         => ! empty( $_POST['struijck_all_day'] ) ? 'yes' : '',
             '_struijck_recurring'       => ! empty( $_POST['struijck_recurring'] ) ? 'yes' : 'no',
             '_struijck_recur_frequency' => isset( $_POST['struijck_recur_frequency'] ) ? sanitize_text_field( wp_unslash( $_POST['struijck_recur_frequency'] ) ) : '',
             '_struijck_recur_interval'  => isset( $_POST['struijck_recur_interval'] ) ? max( 1, (int) $_POST['struijck_recur_interval'] ) : 1,
@@ -208,6 +216,11 @@ class Struijck_Agenda_Admin {
             '_struijck_contact'         => isset( $_POST['struijck_contact'] ) ? sanitize_text_field( wp_unslash( $_POST['struijck_contact'] ) ) : '',
             '_struijck_exceptions'      => isset( $_POST['struijck_exceptions'] ) ? sanitize_text_field( wp_unslash( $_POST['struijck_exceptions'] ) ) : '',
         );
+
+        if ( 'yes' === $fields['_struijck_all_day'] ) {
+            $fields['_struijck_start_time'] = '';
+            $fields['_struijck_end_time']   = '';
+        }
 
         // Weekdays array -> CSV string.
         if ( isset( $_POST['struijck_recur_weekdays'] ) && is_array( $_POST['struijck_recur_weekdays'] ) ) {
@@ -242,7 +255,9 @@ class Struijck_Agenda_Admin {
                 $time = get_post_meta( $post_id, '_struijck_start_time', true );
                 if ( $date ) {
                     echo esc_html( date_i18n( 'D j M Y', strtotime( $date ) ) );
-                    if ( $time ) {
+                    if ( 'yes' === get_post_meta( $post_id, '_struijck_all_day', true ) ) {
+                        echo '<br><small>' . esc_html__( 'Hele dag', 'struijck-agenda' ) . '</small>';
+                    } elseif ( $time ) {
                         echo '<br><small>' . esc_html( $time ) . '</small>';
                     }
                 } else {

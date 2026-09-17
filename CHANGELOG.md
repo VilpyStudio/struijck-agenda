@@ -2,6 +2,14 @@
 
 Alle noemenswaardige wijzigingen aan deze plugin. Versienummers volgen [Semver](https://semver.org/lang/nl/).
 
+## [1.15.0] — 2026-09-17
+- **Nieuw: hele-dag-activiteiten.** Vink "Hele dag" aan in de kalender-planner of in het bewerkscherm; start- en eindtijd zijn dan niet nodig. Opgeslagen als `_struijck_all_day = yes`.
+  - Rooster toont **"Hele dag"** in de tijdkolom; de REST-occurrences krijgen een `all_day`-vlag (tijden leeg).
+  - **Blokkeert de zaal de hele dag** (00:00–24:00) in de conflictcontrole van de planner én van publieke aanvragen. Het aanvraagformulier meldt "de hele dag bezet" en schakelt alle tijden uit.
+  - iCal-export zet ze als datum-events (`DTSTART;VALUE=DATE`) in plaats van 00:00.
+  - Beheerlijst toont "Hele dag" in de kolom Wanneer.
+- **Intern:** gedeelde `Struijck_Agenda_Meta_Fields::minute_range()` voor de tijdsbereik-berekening in beide conflictcontroles.
+
 ## [1.14.2] — 2026-05-16
 - **Fix:** op mobiel brak "tot HH:MM" af naar twee regels in de week-agenda. Eindtijd staat nu `nowrap` en de tijd-kolom is iets breder, zodat "tot 10:00" altijd op één regel blijft.
 

@@ -194,8 +194,12 @@
 
     P.rowHtml = function(e) {
         var h = '<div class="sa-day-row">';
-        h += '<div class="sa-day-row__time">' + esc(e.start_time ? e.start_time.substring(0, 5) : '');
-        if (e.end_time) h += '<span class="sa-day-row__time-end">tot ' + esc(e.end_time.substring(0, 5)) + '</span>';
+        if (e.all_day) {
+            h += '<div class="sa-day-row__time sa-day-row__time--allday">' + esc(this.i18n.allDay || 'Hele dag');
+        } else {
+            h += '<div class="sa-day-row__time">' + esc(e.start_time ? e.start_time.substring(0, 5) : '');
+            if (e.end_time) h += '<span class="sa-day-row__time-end">tot ' + esc(e.end_time.substring(0, 5)) + '</span>';
+        }
         h += '</div><div><div class="sa-day-row__title">' + esc(e.title) + '</div>';
         if (e.zaal) h += '<div class="sa-day-row__zaal">' + esc(e.zaal) + '</div>';
         return h + '</div></div>';
@@ -506,17 +510,20 @@
                 .then(function(r) { return r.json(); })
                 .then(function(list) {
                     booked = (Array.isArray(list) ? list : [])
-                        .filter(function(e) { return e.date === date && e.start_time; })
+                        .filter(function(e) { return e.date === date && (e.start_time || e.all_day); })
                         .map(function(e) {
+                            if (e.all_day) return { s: 0, e: 24 * 60, allDay: true };
                             var s = tmin(e.start_time), en = tmin(e.end_time);
                             if (en == null || en <= s) en = s + 30;
                             return { s: s, e: en };
                         });
                     if (booked.length) {
                         avail.hidden = false;
-                        avail.textContent = 'Al bezet: ' + booked.slice()
-                            .sort(function(a, b) { return a.s - b.s; })
-                            .map(function(b) { return fmt(b.s) + '–' + fmt(b.e); }).join(', ');
+                        avail.textContent = booked.some(function(b) { return b.allDay; })
+                            ? 'Deze zaal is op deze dag de hele dag bezet.'
+                            : 'Al bezet: ' + booked.slice()
+                                .sort(function(a, b) { return a.s - b.s; })
+                                .map(function(b) { return fmt(b.s) + '–' + fmt(b.e); }).join(', ');
                     } else {
                         avail.hidden = true;
                     }

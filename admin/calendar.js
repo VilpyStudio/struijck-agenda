@@ -91,7 +91,8 @@
             events.slice(0, 4).forEach(function(e) {
                 var label = e.title + (e.zaal ? ' — ' + e.zaal : '');
                 html += '<button class="sc-event" style="background:' + eventColor(e) + ';" data-event-id="' + esc(e.id) + '" data-event-date="' + esc(e.date) + '" title="' + esc(label) + '">';
-                if (e.start_time) html += '<span class="sc-event__time">' + esc(e.start_time.substring(0, 5)) + '</span>';
+                if (e.all_day) html += '<span class="sc-event__time">' + esc(i18n.allDay) + '</span>';
+                else if (e.start_time) html += '<span class="sc-event__time">' + esc(e.start_time.substring(0, 5)) + '</span>';
                 if (e.is_recurring) html += '<span class="sc-event__repeat">↻</span> ';
                 html += esc(e.title);
                 html += '</button>';
@@ -199,6 +200,7 @@
             events.forEach(function(e) {
                 html += '<li class="sc-day-list__item" data-edit-id="' + esc(e.id) + '" data-edit-date="' + esc(e.date) + '">';
                 html += '<div class="sc-day-list__time">';
+                if (e.all_day) html += esc(i18n.allDay);
                 if (e.start_time) html += esc(e.start_time.substring(0, 5));
                 if (e.end_time) html += ' – ' + esc(e.end_time.substring(0, 5));
                 html += '</div>';
@@ -294,11 +296,18 @@
         }
         html += '</div>';
 
-        html += '<div class="sc-form__row sc-form__row--split">';
+        html += '<div class="sc-form__row">';
+        html += '  <label class="sc-form__check">';
+        html += '    <input type="checkbox" name="all_day" id="sc-allday-cb"' + (data.all_day ? ' checked' : '') + '>';
+        html += '    <span>' + esc(i18n.allDay) + '</span>';
+        html += '  </label>';
+        html += '</div>';
+
+        html += '<div class="sc-form__row sc-form__row--split" id="sc-time-row"' + (data.all_day ? ' style="display:none;"' : '') + '>';
         html += '  <div><label class="sc-form__label">' + esc(i18n.startTime) + ' *</label>';
-        html += '    <select class="sc-form__select" name="start_time" required>' + timeOptions(data.start_time) + '</select></div>';
+        html += '    <select class="sc-form__select" name="start_time"' + (data.all_day ? ' disabled' : ' required') + '>' + timeOptions(data.start_time) + '</select></div>';
         html += '  <div><label class="sc-form__label">' + esc(i18n.endTime) + '</label>';
-        html += '    <select class="sc-form__select" name="end_time">' + timeOptions(data.end_time) + '</select></div>';
+        html += '    <select class="sc-form__select" name="end_time"' + (data.all_day ? ' disabled' : '') + '>' + timeOptions(data.end_time) + '</select></div>';
         html += '</div>';
 
         html += '<div class="sc-form__row">';
@@ -339,6 +348,18 @@
                 });
             }
 
+            var allDayCb = modal.querySelector('#sc-allday-cb');
+            var timeRow = modal.querySelector('#sc-time-row');
+            if (allDayCb && timeRow) {
+                allDayCb.addEventListener('change', function() {
+                    timeRow.style.display = allDayCb.checked ? 'none' : '';
+                    Array.prototype.forEach.call(timeRow.querySelectorAll('select'), function(s) {
+                        s.disabled = allDayCb.checked;
+                    });
+                    timeRow.querySelector('[name="start_time"]').required = !allDayCb.checked;
+                });
+            }
+
             var saveBtn = modal.querySelector('[data-save]');
             saveBtn.addEventListener('click', function() {
                 saveBooking(modal, saveBtn);
@@ -367,7 +388,13 @@
 
         var stEl = form.querySelector('[name="start_time"]');
         var etEl = form.querySelector('[name="end_time"]');
-        if (stEl && etEl && etEl.value && etEl.value <= stEl.value) {
+        var adEl = form.querySelector('[name="all_day"]');
+        var allDay = adEl && adEl.checked;
+        if (!allDay && stEl && !stEl.value) {
+            alert('Kies een starttijd of vink "' + i18n.allDay + '" aan.');
+            return;
+        }
+        if (!allDay && stEl && etEl && etEl.value && etEl.value <= stEl.value) {
             alert('De eindtijd moet na de starttijd liggen.');
             return;
         }

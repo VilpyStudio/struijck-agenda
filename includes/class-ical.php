@@ -65,38 +65,39 @@ class Struijck_Agenda_ICal {
     }
 
     protected static function occurrence_to_vevent( $occ ) {
-        $start_dt = self::format_dt( $occ['date'], $occ['start_time'] );
-        $end_dt   = self::format_dt( $occ['date'], $occ['end_time'] ?: $occ['start_time'] );
-
-        return array(
-            'BEGIN:VEVENT',
-            'UID:' . $occ['id'] . '-' . $occ['date'] . '@' . self::uid_domain(),
-            'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
-            'DTSTART:' . $start_dt,
-            'DTEND:' . $end_dt,
-            'SUMMARY:' . self::escape_text( $occ['title'] ),
-            'LOCATION:' . self::escape_text( $occ['zaal'] ),
-            'DESCRIPTION:' . self::escape_text( $occ['description'] ),
-            'END:VEVENT',
+        return array_merge(
+            array(
+                'BEGIN:VEVENT',
+                'UID:' . $occ['id'] . '-' . $occ['date'] . '@' . self::uid_domain(),
+                'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
+            ),
+            self::dt_lines( $occ['date'], $occ['start_time'], $occ['end_time'], ! empty( $occ['all_day'] ) ),
+            array(
+                'SUMMARY:' . self::escape_text( $occ['title'] ),
+                'LOCATION:' . self::escape_text( $occ['zaal'] ),
+                'DESCRIPTION:' . self::escape_text( $occ['description'] ),
+                'END:VEVENT',
+            )
         );
     }
 
     protected static function activity_to_vevent( $post, $meta ) {
-        $start = self::format_dt( $meta['start_date'], $meta['start_time'] );
-        $end   = self::format_dt( $meta['start_date'], $meta['end_time'] ?: $meta['start_time'] );
-
         $terms = wp_get_post_terms( $post->ID, 'struijck_zaal', array( 'fields' => 'names' ) );
         $zaal  = ! is_wp_error( $terms ) && ! empty( $terms ) ? implode( ', ', $terms ) : '';
 
-        $event = array(
-            'BEGIN:VEVENT',
-            'UID:' . $post->ID . '@' . self::uid_domain(),
-            'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
-            'DTSTART:' . $start,
-            'DTEND:' . $end,
+        $event = array_merge(
+            array(
+                'BEGIN:VEVENT',
+                'UID:' . $post->ID . '@' . self::uid_domain(),
+                'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
+            ),
+            self::dt_lines( $meta['start_date'], $meta['start_time'], $meta['end_time'], 'yes' === $meta['all_day'] )
+        );
+        array_push(
+            $event,
             'SUMMARY:' . self::escape_text( get_the_title( $post ) ),
             'LOCATION:' . self::escape_text( $zaal ),
-            'DESCRIPTION:' . self::escape_text( wp_strip_all_tags( $post->post_content ) ),
+            'DESCRIPTION:' . self::escape_text( wp_strip_all_tags( $post->post_content ) )
         );
 
         if ( ! empty( $meta['recurring'] ) && 'yes' === $meta['recurring'] ) {
@@ -144,6 +145,24 @@ class Struijck_Agenda_ICal {
         }
 
         return implode( ';', $parts );
+    }
+
+    /**
+     * DTSTART/DTEND lines. Whole-day activities become date-only events
+     * (DTEND is exclusive, so it points at the next day).
+     */
+    protected static function dt_lines( $date, $start_time, $end_time, $all_day ) {
+        if ( $all_day ) {
+            $ts = strtotime( $date );
+            return array(
+                'DTSTART;VALUE=DATE:' . gmdate( 'Ymd', $ts ),
+                'DTEND;VALUE=DATE:' . gmdate( 'Ymd', strtotime( '+1 day', $ts ) ),
+            );
+        }
+        return array(
+            'DTSTART:' . self::format_dt( $date, $start_time ),
+            'DTEND:' . self::format_dt( $date, $end_time ? $end_time : $start_time ),
+        );
     }
 
     protected static function format_dt( $date, $time ) {

@@ -13,6 +13,7 @@ class Struijck_Agenda_Meta_Fields {
         '_struijck_start_date'      => 'string',
         '_struijck_start_time'      => 'string',
         '_struijck_end_time'        => 'string',
+        '_struijck_all_day'         => 'string',
         '_struijck_recurring'       => 'string',
         '_struijck_recur_frequency' => 'string',
         '_struijck_recur_interval'  => 'integer',
@@ -50,5 +51,28 @@ class Struijck_Agenda_Meta_Fields {
             $meta[ $clean_key ] = get_post_meta( $post_id, $key, true );
         }
         return $meta;
+    }
+
+    /**
+     * Minutes-since-midnight range an occurrence occupies. A whole-day
+     * activity has no times and blocks the zaal from 00:00 to 24:00.
+     *
+     * @return int[] array( start, end )
+     */
+    public static function minute_range( $start_time, $end_time, $all_day ) {
+        if ( $all_day ) {
+            return array( 0, 24 * 60 );
+        }
+        $start = self::to_min( $start_time );
+        $end   = self::to_min( $end_time ? $end_time : $start_time );
+        return array( $start, $end );
+    }
+
+    /** "HH:MM" (or "HH:MM:SS") -> minutes since midnight. */
+    public static function to_min( $time ) {
+        if ( ! preg_match( '/^(\d{1,2}):(\d{2})/', (string) $time, $m ) ) {
+            return 0;
+        }
+        return ( (int) $m[1] ) * 60 + (int) $m[2];
     }
 }

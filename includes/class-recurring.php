@@ -170,13 +170,15 @@ class Struijck_Agenda_Recurring {
     protected static function build_occurrence( $post, $meta, $date ) {
         $terms = wp_get_post_terms( $post->ID, 'struijck_zaal', array( 'fields' => 'names' ) );
         $zaal  = ! is_wp_error( $terms ) && ! empty( $terms ) ? implode( ', ', $terms ) : '';
+        $all_day = ! empty( $meta['all_day'] ) && 'yes' === $meta['all_day'];
 
         return array(
             'id'             => $post->ID,
             'title'          => get_the_title( $post ),
             'date'           => $date,
-            'start_time'     => isset( $meta['start_time'] ) ? $meta['start_time'] : '',
-            'end_time'       => isset( $meta['end_time'] ) ? $meta['end_time'] : '',
+            'all_day'        => $all_day,
+            'start_time'     => ( ! $all_day && isset( $meta['start_time'] ) ) ? $meta['start_time'] : '',
+            'end_time'       => ( ! $all_day && isset( $meta['end_time'] ) ) ? $meta['end_time'] : '',
             'zaal'           => $zaal,
             'description'    => wp_strip_all_tags( $post->post_content ),
             'permalink'      => get_permalink( $post ),

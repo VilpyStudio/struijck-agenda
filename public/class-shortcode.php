@@ -114,6 +114,7 @@ class Struijck_Agenda_Shortcode {
                 'list'       => __( 'Lijst', 'struijck-agenda' ),
                 'allZalen'   => __( 'Alle zalen', 'struijck-agenda' ),
                 'noEvents'   => __( 'Geen activiteiten in deze periode.', 'struijck-agenda' ),
+                'allDay'     => __( 'Hele dag', 'struijck-agenda' ),
                 'loading'    => __( 'Bezig met laden…', 'struijck-agenda' ),
                 'close'      => __( 'Sluiten', 'struijck-agenda' ),
                 'recurring'  => __( 'Terugkerende activiteit', 'struijck-agenda' ),
