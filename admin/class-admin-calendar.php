@@ -177,6 +177,16 @@ class Struijck_Agenda_Admin_Calendar {
             $end_time   = '';
         }
 
+        // Bij het bewerken van een terugkerende boeking komt de datum uit de
+        // aangeklikte herhaling. Houd de oorspronkelijke startdatum vast,
+        // anders verdwijnen alle eerdere herhalingen.
+        if ( $id && $recurring ) {
+            $orig_date = get_post_meta( $id, '_struijck_start_date', true );
+            if ( $orig_date && gmdate( 'w', strtotime( $orig_date ) ) === gmdate( 'w', strtotime( $date ) ) ) {
+                $date = $orig_date;
+            }
+        }
+
         if ( ! $title || ! $date || ( ! $all_day && ! $start_time ) ) {
             wp_send_json_error( 'Vul minimaal titel, datum en starttijd in (of kies "Hele dag")' );
         }
@@ -275,6 +285,11 @@ class Struijck_Agenda_Admin_Calendar {
      */
     protected static function find_conflict( $current_id, $zaal_id, $date, $start_time, $end_time, $all_day, $recurring, $recur_until ) {
         $dates = self::booking_dates( $date, $recurring, $recur_until );
+        if ( $current_id ) {
+            // Datums waarop deze boeking bewust niet plaatsvindt, tellen niet mee.
+            $exceptions = array_filter( array_map( 'trim', explode( ',', (string) get_post_meta( $current_id, '_struijck_exceptions', true ) ) ) );
+            $dates      = array_values( array_diff( $dates, $exceptions ) );
+        }
         if ( empty( $dates ) ) {
             return '';
         }

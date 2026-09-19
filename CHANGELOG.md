@@ -2,6 +2,11 @@
 
 Alle noemenswaardige wijzigingen aan deze plugin. Versienummers volgen [Semver](https://semver.org/lang/nl/).
 
+## [1.15.1] — 2026-09-19
+- **Fix:** een terugkerende boeking bewerken in de kalender-planner wiste de einddatum ("Herhalen tot en met"), omdat de occurrences die niet meegaven. Occurrences bevatten nu `recur_until`.
+- **Fix:** bij het bewerken van een terugkerende boeking werd de startdatum verplaatst naar de aangeklikte herhaling, waardoor alle eerdere herhalingen verdwenen. De oorspronkelijke startdatum blijft nu staan.
+- **Fix:** de conflictcontrole in de planner telde de uitzonderingsdatums van de boeking zelf mee, waardoor een terugkerende training niet op te slaan was als er op een uitgezonderde dag een hele-dag-activiteit stond.
+
 ## [1.15.0] — 2026-09-17
 - **Nieuw: hele-dag-activiteiten.** Vink "Hele dag" aan in de kalender-planner of in het bewerkscherm; start- en eindtijd zijn dan niet nodig. Opgeslagen als `_struijck_all_day = yes`.
   - Rooster toont **"Hele dag"** in de tijdkolom; de REST-occurrences krijgen een `all_day`-vlag (tijden leeg).

@@ -185,6 +185,7 @@ class Struijck_Agenda_Recurring {
             'max_deelnemers' => isset( $meta['max_deelnemers'] ) ? (int) $meta['max_deelnemers'] : 0,
             'contact'        => isset( $meta['contact'] ) ? $meta['contact'] : '',
             'is_recurring'   => ! empty( $meta['recurring'] ) && 'yes' === $meta['recurring'],
+            'recur_until'    => isset( $meta['recur_until'] ) ? $meta['recur_until'] : '',
         );
     }
 }
