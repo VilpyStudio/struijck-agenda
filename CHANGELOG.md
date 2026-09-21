@@ -2,6 +2,9 @@
 
 Alle noemenswaardige wijzigingen aan deze plugin. Versienummers volgen [Semver](https://semver.org/lang/nl/).
 
+## [1.15.2] — 2026-09-21
+- **Fix:** titels met een `&` (bijv. "Beweeg mee & fit in") verschenen in het rooster als `&#038;`. Titels gaan nu als platte tekst naar de frontend en de iCal-feed.
+
 ## [1.15.1] — 2026-09-19
 - **Fix:** een terugkerende boeking bewerken in de kalender-planner wiste de einddatum ("Herhalen tot en met"), omdat de occurrences die niet meegaven. Occurrences bevatten nu `recur_until`.
 - **Fix:** bij het bewerken van een terugkerende boeking werd de startdatum verplaatst naar de aangeklikte herhaling, waardoor alle eerdere herhalingen verdwenen. De oorspronkelijke startdatum blijft nu staan.

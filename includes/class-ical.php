@@ -95,7 +95,7 @@ class Struijck_Agenda_ICal {
         );
         array_push(
             $event,
-            'SUMMARY:' . self::escape_text( get_the_title( $post ) ),
+            'SUMMARY:' . self::escape_text( html_entity_decode( get_the_title( $post ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ),
             'LOCATION:' . self::escape_text( $zaal ),
             'DESCRIPTION:' . self::escape_text( wp_strip_all_tags( $post->post_content ) )
         );

@@ -174,7 +174,8 @@ class Struijck_Agenda_Recurring {
 
         return array(
             'id'             => $post->ID,
-            'title'          => get_the_title( $post ),
+            // Platte tekst: get_the_title() zet & om in &#038;, en de frontend escapet zelf.
+            'title'          => html_entity_decode( get_the_title( $post ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
             'date'           => $date,
             'all_day'        => $all_day,
             'start_time'     => ( ! $all_day && isset( $meta['start_time'] ) ) ? $meta['start_time'] : '',
