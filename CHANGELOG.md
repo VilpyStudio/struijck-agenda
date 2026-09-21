@@ -2,6 +2,9 @@
 
 Alle noemenswaardige wijzigingen aan deze plugin. Versienummers volgen [Semver](https://semver.org/lang/nl/).
 
+## [1.17.0] — 2026-09-21
+- **Nieuw: snel naar een andere maand.** Klik in de planner op de maandtitel ("September 2026 ▾") voor een kiezer met alle maanden en pijltjes voor het jaar. De huidige maand heeft een oranje rand, de getoonde maand is donker.
+
 ## [1.16.0] — 2026-09-21
 - **Nieuw: bij een terugkerende boeking kies je bij Verwijderen tussen "Alleen [datum]" en "Hele reeks".** Alleen die datum wordt een uitzondering (`_struijck_exceptions`); de rest van de reeks blijft staan.
 - **Verwijderen gaat nu naar de prullenbak** in plaats van direct definitief wissen. In de planner staat een link naar de prullenbak om iets terug te zetten.

@@ -808,3 +808,79 @@
 .sc-btn.sc-btn--danger-outline:hover {
     background: #fcf0f1;
 }
+
+/* ===== Maandkiezer (klik op de maandtitel) ===== */
+.sc-monthpick-wrap {
+    position: relative;
+}
+.sc-toolbar__title--btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    margin: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sc-toolbar__title--btn:hover,
+.sc-toolbar__title--btn[aria-expanded="true"] {
+    border-color: var(--sc-border);
+    background: var(--sc-cream);
+}
+.sc-toolbar__caret {
+    font-size: 0.8em;
+    color: var(--sc-text-soft);
+}
+.sc-monthpick {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 8px;
+    z-index: 50;
+    width: 280px;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid var(--sc-border);
+    border-radius: 14px;
+    box-shadow: 0 14px 34px rgba(26, 61, 58, 0.14);
+}
+.sc-monthpick__year {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 15px;
+}
+.sc-monthpick__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+.sc-monthpick__m {
+    padding: 10px 0;
+    border: 1px solid var(--sc-border);
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+    font-size: 14px;
+    text-transform: capitalize;
+    cursor: pointer;
+}
+.sc-monthpick__m:hover {
+    background: var(--sc-cream);
+}
+.sc-monthpick__m.is-now {
+    border-color: var(--sc-accent, #e8643c);
+}
+.sc-monthpick__m.is-active,
+.sc-monthpick__m.is-active:hover {
+    background: var(--sc-text, #1a3d3a);
+    border-color: var(--sc-text, #1a3d3a);
+    color: #fff;
+}

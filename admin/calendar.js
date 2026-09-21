@@ -8,11 +8,21 @@
     var cfg, i18n, app;
     var state = {
         viewDate: new Date(),
+        pickOpen: false,
+        pickYear: null,
         events: [],
         loading: false
     };
 
     document.addEventListener('DOMContentLoaded', init);
+
+    // Maandkiezer sluiten bij klik ernaast of Escape.
+    document.addEventListener('click', function() {
+        if (state.pickOpen) { state.pickOpen = false; render(); }
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && state.pickOpen) { state.pickOpen = false; render(); }
+    });
 
     function init() {
         if (typeof StruijckCalendar === 'undefined') return;
@@ -39,7 +49,28 @@
         html += '    <button class="sc-btn sc-btn--icon" data-action="prev" aria-label="Vorige maand">‹</button>';
         html += '    <button class="sc-btn" data-action="today">' + esc(i18n.today) + '</button>';
         html += '    <button class="sc-btn sc-btn--icon" data-action="next" aria-label="Volgende maand">›</button>';
-        html += '    <span class="sc-toolbar__title">' + esc(monthName) + ' ' + year + '</span>';
+        html += '    <div class="sc-monthpick-wrap">';
+        html += '      <button type="button" class="sc-toolbar__title sc-toolbar__title--btn" data-pick-toggle aria-haspopup="true" aria-expanded="' + (state.pickOpen ? 'true' : 'false') + '" title="Kies een maand">' + esc(monthName) + ' ' + year + ' <span class="sc-toolbar__caret" aria-hidden="true">▾</span></button>';
+        if (state.pickOpen) {
+            var py = state.pickYear || year;
+            var now = new Date();
+            html += '      <div class="sc-monthpick" role="dialog" aria-label="Kies een maand">';
+            html += '        <div class="sc-monthpick__year">';
+            html += '          <button type="button" class="sc-btn sc-btn--icon" data-pick-year="-1" aria-label="Vorig jaar">‹</button>';
+            html += '          <span>' + py + '</span>';
+            html += '          <button type="button" class="sc-btn sc-btn--icon" data-pick-year="1" aria-label="Volgend jaar">›</button>';
+            html += '        </div>';
+            html += '        <div class="sc-monthpick__grid">';
+            for (var mi = 0; mi < 12; mi++) {
+                var cls = 'sc-monthpick__m';
+                if (py === year && mi === d.getMonth()) cls += ' is-active';
+                if (py === now.getFullYear() && mi === now.getMonth()) cls += ' is-now';
+                html += '<button type="button" class="' + cls + '" data-pick-month="' + mi + '">' + esc(['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'][mi]) + '</button>';
+            }
+            html += '        </div>';
+            html += '      </div>';
+        }
+        html += '    </div>';
         html += '  </div>';
         html += '  <div class="sc-toolbar__help">Klik op een dag om te plannen' + (cfg.trashUrl ? ' · <a href="' + esc(cfg.trashUrl) + '">' + esc(i18n.trash) + '</a>' : '') + '</div>';
         html += '</div>';
@@ -115,6 +146,34 @@
     }
 
     function bindToolbar() {
+        var toggle = app.querySelector('[data-pick-toggle]');
+        if (toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                state.pickOpen = !state.pickOpen;
+                state.pickYear = state.viewDate.getFullYear();
+                render();
+            });
+        }
+        app.querySelectorAll('[data-pick-year]').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                state.pickYear = (state.pickYear || state.viewDate.getFullYear()) + parseInt(btn.dataset.pickYear, 10);
+                render();
+            });
+        });
+        app.querySelectorAll('[data-pick-month]').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                state.viewDate = new Date(state.pickYear || state.viewDate.getFullYear(), parseInt(btn.dataset.pickMonth, 10), 1);
+                state.pickOpen = false;
+                render();
+                fetchMonth();
+            });
+        });
+        var pick = app.querySelector('.sc-monthpick');
+        if (pick) pick.addEventListener('click', function(e) { e.stopPropagation(); });
+
         app.querySelectorAll('[data-action]').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var a = btn.dataset.action;
@@ -123,6 +182,7 @@
                 else if (a === 'next') d.setMonth(d.getMonth() + 1);
                 else if (a === 'today') d = new Date();
                 state.viewDate = d;
+                state.pickOpen = false;
                 render();
                 fetchMonth();
             });
