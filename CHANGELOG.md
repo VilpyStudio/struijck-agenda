@@ -2,6 +2,9 @@
 
 Alle noemenswaardige wijzigingen aan deze plugin. Versienummers volgen [Semver](https://semver.org/lang/nl/).
 
+## [1.18.0] — 2026-09-21
+- **Nieuw: meerdere zalen per boeking.** In de planner staan de zalen als vinkjes; vink bv. Sporthal én Kantine aan om ze tegelijk te boeken. De conflictcontrole kijkt per zaal, de boeking toont in de planner beide zaalkleuren, en op de website staat ze onder beide zaalfilters.
+
 ## [1.17.0] — 2026-09-21
 - **Nieuw: snel naar een andere maand.** Klik in de planner op de maandtitel ("September 2026 ▾") voor een kiezer met alle maanden en pijltjes voor het jaar. De huidige maand heeft een oranje rand, de getoonde maand is donker.
 

@@ -884,3 +884,20 @@
     border-color: var(--sc-text, #1a3d3a);
     color: #fff;
 }
+
+/* ===== Meerdere zalen per boeking ===== */
+.sc-form__zalen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.sc-form__check--zaal {
+    flex: 1 1 140px;
+    cursor: pointer;
+}
+.sc-form__hint {
+    display: block;
+    margin-top: 6px;
+    color: var(--sc-text-soft);
+    font-size: 12px;
+}

@@ -109,6 +109,8 @@ class Struijck_Agenda_Admin_Calendar {
                 'cancel'        => 'Annuleren',
                 'close'         => 'Sluiten',
                 'confirmDelete' => 'Deze boeking naar de prullenbak verplaatsen? Je kunt hem daar altijd terugzetten.',
+                'zalenHint'     => 'Vink meerdere zalen aan om ze tegelijk te boeken.',
+                'pickZaalRequired' => 'Kies minimaal één zaal.',
                 'deleteWhat'    => 'Wat wil je verwijderen?',
                 'deleteOne'     => 'Alleen %s',
                 'deleteSeries'  => 'Hele reeks',
@@ -173,7 +175,12 @@ class Struijck_Agenda_Admin_Calendar {
         $start_time  = isset( $_POST['start_time'] ) ? sanitize_text_field( wp_unslash( $_POST['start_time'] ) ) : '';
         $end_time    = isset( $_POST['end_time'] ) ? sanitize_text_field( wp_unslash( $_POST['end_time'] ) ) : '';
         $all_day     = ! empty( $_POST['all_day'] );
-        $zaal_id     = isset( $_POST['zaal_id'] ) ? (int) $_POST['zaal_id'] : 0;
+        // Eén of meer zalen (bv. sporthal + kantine). zaal_id blijft werken voor oudere clients.
+        $zaal_ids = isset( $_POST['zaal_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['zaal_ids'] ) ) : array();
+        if ( ! $zaal_ids && ! empty( $_POST['zaal_id'] ) ) {
+            $zaal_ids = array( (int) $_POST['zaal_id'] );
+        }
+        $zaal_ids = array_values( array_unique( array_filter( $zaal_ids ) ) );
         $recurring   = ! empty( $_POST['recurring'] );
         $recur_until = isset( $_POST['recur_until'] ) ? sanitize_text_field( wp_unslash( $_POST['recur_until'] ) ) : '';
         $notes       = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
@@ -203,7 +210,7 @@ class Struijck_Agenda_Admin_Calendar {
 
         // Conflictcontrole: een zaal die niet dubbel verhuurd mag worden,
         // kan niet twee overlappende boekingen op hetzelfde tijdstip hebben.
-        if ( $zaal_id ) {
+        foreach ( $zaal_ids as $zaal_id ) {
             $allow_double = '1' === get_term_meta( $zaal_id, Struijck_Agenda_Post_Types::ALLOW_DOUBLE_META, true );
             if ( ! $allow_double ) {
                 $conflict = self::find_conflict( $id, $zaal_id, $date, $start_time, $end_time, $all_day, $recurring, $recur_until );
@@ -250,11 +257,7 @@ class Struijck_Agenda_Admin_Calendar {
         }
 
         // Zaal toewijzen.
-        if ( $zaal_id ) {
-            wp_set_object_terms( $post_id, array( $zaal_id ), 'struijck_zaal' );
-        } else {
-            wp_set_object_terms( $post_id, array(), 'struijck_zaal' );
-        }
+        wp_set_object_terms( $post_id, $zaal_ids, 'struijck_zaal' );
 
         // Huurder vastleggen als term, zodat de naam in de keuzelijst komt
         // en niet telkens opnieuw getypt hoeft te worden.

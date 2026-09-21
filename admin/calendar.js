@@ -304,19 +304,20 @@
         var dow = (d.getDay() + 6) % 7;
         var dayLabel = i18n.weekdaysLong[dow] + ' ' + d.getDate() + ' ' + i18n.months[d.getMonth()] + ' ' + d.getFullYear();
 
-        // Determine zaal_id from name (events have zaal name).
-        var zaalId = '';
+        // Zalen van deze boeking (een boeking kan meerdere zalen hebben, bv. sporthal + kantine).
+        var zaalIds = [];
         if (isEdit && data.zaal) {
+            var namen = String(data.zaal).split(',').map(function(n) { return n.trim(); });
             cfg.zalen.forEach(function(z) {
-                if (z.name === data.zaal) zaalId = z.id;
+                if (namen.indexOf(z.name) !== -1) zaalIds.push(String(z.id));
             });
         }
         // New booking (or zaal not matched): default to Sporthal, else first zaal.
-        if (!zaalId) {
+        if (!zaalIds.length) {
             cfg.zalen.forEach(function(z) {
-                if (z.name.toLowerCase() === 'sporthal') zaalId = z.id;
+                if (z.name.toLowerCase() === 'sporthal') zaalIds.push(String(z.id));
             });
-            if (!zaalId && cfg.zalen.length) zaalId = cfg.zalen[0].id;
+            if (!zaalIds.length && cfg.zalen.length) zaalIds.push(String(cfg.zalen[0].id));
         }
 
         var html = '<div class="sc-modal-content"><div class="sc-modal__header">';
@@ -347,12 +348,16 @@
         if (cfg.zalen.length === 0) {
             html += '  <div class="sc-form__no-zalen">' + esc(i18n.noZalen) + ' <a href="' + esc(cfg.newZaalUrl) + '" target="_blank">Zaal aanmaken</a></div>';
         } else {
-            html += '  <select class="sc-form__select" name="zaal_id">';
+            html += '  <div class="sc-form__zalen">';
             cfg.zalen.forEach(function(z) {
-                var sel = (String(z.id) === String(zaalId)) ? ' selected' : '';
-                html += '<option value="' + esc(z.id) + '"' + sel + '>' + esc(z.name) + '</option>';
+                var chk = zaalIds.indexOf(String(z.id)) !== -1 ? ' checked' : '';
+                html += '<label class="sc-form__check sc-form__check--zaal">';
+                html += '<input type="checkbox" name="zaal_ids[]" value="' + esc(z.id) + '"' + chk + '>';
+                html += '<span class="sc-legend__swatch" style="background:' + esc(z.color) + '"></span>';
+                html += '<span>' + esc(z.name) + '</span></label>';
             });
-            html += '  </select>';
+            html += '  </div>';
+            if (cfg.zalen.length > 1) html += '  <small class="sc-form__hint">' + esc(i18n.zalenHint) + '</small>';
         }
         html += '</div>';
 
@@ -476,6 +481,11 @@
             return;
         }
 
+        if (form.querySelector('[name="zaal_ids[]"]') && !form.querySelector('[name="zaal_ids[]"]:checked')) {
+            alert(i18n.pickZaalRequired);
+            return;
+        }
+
         var fd = new FormData(form);
         fd.append('action', 'struijck_save_booking');
         fd.append('nonce', cfg.nonce);
@@ -591,12 +601,20 @@
     }
     function eventColor(ev) {
         if (!ev.zaal) return '#9ca3af';
-        var name = String(ev.zaal).split(',')[0].trim();
-        var color = '#9ca3af';
-        (cfg.zalen || []).forEach(function(z) {
-            if (z.name === name) color = z.color;
+        var colors = [];
+        String(ev.zaal).split(',').forEach(function(n) {
+            n = n.trim();
+            (cfg.zalen || []).forEach(function(z) {
+                if (z.name === n) colors.push(z.color);
+            });
         });
-        return color;
+        if (!colors.length) return '#9ca3af';
+        if (colors.length === 1) return colors[0];
+        // Meerdere zalen: kleuren naast elkaar, zodat je ziet dat beide bezet zijn.
+        var step = 100 / colors.length;
+        return 'linear-gradient(90deg, ' + colors.map(function(c, i) {
+            return c + ' ' + (i * step) + '% ' + ((i + 1) * step) + '%';
+        }).join(', ') + ')';
     }
 
     // Custom combobox for the huurder field: filter-as-you-type, click,
