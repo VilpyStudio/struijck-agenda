@@ -142,7 +142,8 @@
 /* ===== Maand grid ===== */
 .sc-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    /* minmax(0, 1fr): lange titels mogen een kolom niet breder maken (zondag viel weg) */
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     background: var(--sc-border);
     border: none;
     overflow: hidden;
@@ -161,6 +162,7 @@
 }
 
 .sc-day {
+    min-width: 0;
     background: #fff;
     min-height: 130px;
     padding: 6px 6px 30px;
@@ -784,4 +786,25 @@
     .sc-combo__opt {
         padding: 13px 12px;
     }
+}
+
+/* ===== Verwijderen: keuze bij terugkerende boeking ===== */
+.sc-delete-choice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.sc-delete-choice__label {
+    font-size: 13px;
+    color: var(--sc-text-soft);
+    width: 100%;
+}
+.sc-btn.sc-btn--danger-outline {
+    background: #fff;
+    color: #b32d2e;
+    border-color: #b32d2e;
+}
+.sc-btn.sc-btn--danger-outline:hover {
+    background: #fcf0f1;
 }

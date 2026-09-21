@@ -41,7 +41,7 @@
         html += '    <button class="sc-btn sc-btn--icon" data-action="next" aria-label="Volgende maand">›</button>';
         html += '    <span class="sc-toolbar__title">' + esc(monthName) + ' ' + year + '</span>';
         html += '  </div>';
-        html += '  <div class="sc-toolbar__help">Klik op een dag om te plannen</div>';
+        html += '  <div class="sc-toolbar__help">Klik op een dag om te plannen' + (cfg.trashUrl ? ' · <a href="' + esc(cfg.trashUrl) + '">' + esc(i18n.trash) + '</a>' : '') + '</div>';
         html += '</div>';
 
         // Legenda
@@ -377,7 +377,24 @@
             var deleteBtn = modal.querySelector('[data-delete]');
             if (deleteBtn) {
                 deleteBtn.addEventListener('click', function() {
-                    if (confirm(i18n.confirmDelete)) deleteBooking(data.id, modal);
+                    if (!data.is_recurring) {
+                        if (confirm(i18n.confirmDelete)) deleteBooking(data.id, modal, 'all');
+                        return;
+                    }
+                    // Terugkerend: kiezen tussen alleen deze datum en de hele reeks.
+                    var holder = deleteBtn.parentNode;
+                    var shortLabel = i18n.weekdaysLong[dow] + ' ' + d.getDate() + ' ' + i18n.months[d.getMonth()];
+                    holder.innerHTML =
+                        '<span class="sc-delete-choice__label">' + esc(i18n.deleteWhat) + '</span>' +
+                        '<button class="sc-btn sc-btn--danger" data-delete-one>' + esc(i18n.deleteOne.replace('%s', shortLabel)) + '</button>' +
+                        '<button class="sc-btn sc-btn--danger-outline" data-delete-all>' + esc(i18n.deleteSeries) + '</button>';
+                    holder.className = 'sc-delete-choice';
+                    holder.querySelector('[data-delete-one]').addEventListener('click', function() {
+                        deleteBooking(data.id, modal, 'occurrence', data.date);
+                    });
+                    holder.querySelector('[data-delete-all]').addEventListener('click', function() {
+                        if (confirm(i18n.deleteSeriesConfirm)) deleteBooking(data.id, modal, 'all');
+                    });
                 });
             }
         });
@@ -429,11 +446,13 @@
             });
     }
 
-    function deleteBooking(id, modal) {
+    function deleteBooking(id, modal, scope, date) {
         var fd = new FormData();
         fd.append('action', 'struijck_delete_booking');
         fd.append('nonce', cfg.nonce);
         fd.append('id', id);
+        fd.append('scope', scope || 'all');
+        if (date) fd.append('date', date);
 
         fetch(cfg.ajaxUrl, {
             method: 'POST',

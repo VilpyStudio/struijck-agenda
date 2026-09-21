@@ -2,6 +2,11 @@
 
 Alle noemenswaardige wijzigingen aan deze plugin. Versienummers volgen [Semver](https://semver.org/lang/nl/).
 
+## [1.16.0] — 2026-09-21
+- **Nieuw: bij een terugkerende boeking kies je bij Verwijderen tussen "Alleen [datum]" en "Hele reeks".** Alleen die datum wordt een uitzondering (`_struijck_exceptions`); de rest van de reeks blijft staan.
+- **Verwijderen gaat nu naar de prullenbak** in plaats van direct definitief wissen. In de planner staat een link naar de prullenbak om iets terug te zetten.
+- **Fix:** in de maandplanner viel de zondag rechts buiten beeld doordat lange titels de kolommen breder maakten. Kolommen zijn nu altijd even breed.
+
 ## [1.15.2] — 2026-09-21
 - **Fix:** titels met een `&` (bijv. "Beweeg mee & fit in") verschenen in het rooster als `&#038;`. Titels gaan nu als platte tekst naar de frontend en de iCal-feed.
 

@@ -86,6 +86,7 @@ class Struijck_Agenda_Admin_Calendar {
             'zalen'    => $zalen,
             'huurders' => $huurders,
             'newZaalUrl' => admin_url( 'edit-tags.php?taxonomy=struijck_zaal&post_type=struijck_activiteit' ),
+            'trashUrl'   => admin_url( 'edit.php?post_status=trash&post_type=struijck_activiteit' ),
             'i18n'     => array(
                 'months'        => array( 'januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december' ),
                 'weekdaysShort' => array( 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo' ),
@@ -107,7 +108,12 @@ class Struijck_Agenda_Admin_Calendar {
                 'delete'        => 'Verwijderen',
                 'cancel'        => 'Annuleren',
                 'close'         => 'Sluiten',
-                'confirmDelete' => 'Weet je zeker dat je deze boeking wilt verwijderen?',
+                'confirmDelete' => 'Deze boeking naar de prullenbak verplaatsen? Je kunt hem daar altijd terugzetten.',
+                'deleteWhat'    => 'Wat wil je verwijderen?',
+                'deleteOne'     => 'Alleen %s',
+                'deleteSeries'  => 'Hele reeks',
+                'deleteSeriesConfirm' => 'Alle herhalingen van deze boeking naar de prullenbak verplaatsen? Je kunt hem daar terugzetten.',
+                'trash'         => 'Prullenbak',
                 'noEvents'      => 'Geen boekingen op deze dag.',
                 'addAnother'    => '+ Nog een boeking toevoegen',
                 'recurringNotice' => 'Dit is een terugkerende boeking. Wijzigingen gelden voor alle herhalingen.',
@@ -271,12 +277,32 @@ class Struijck_Agenda_Admin_Calendar {
             wp_send_json_error( 'Geen ID' );
         }
 
-        $result = wp_delete_post( $id, true );
+        if ( 'struijck_activiteit' !== get_post_type( $id ) || ! current_user_can( 'delete_post', $id ) ) {
+            wp_send_json_error( 'Geen toegang', 403 );
+        }
+
+        // Alleen deze datum: als uitzondering op de terugkerende reeks zetten.
+        $scope = isset( $_POST['scope'] ) ? sanitize_key( wp_unslash( $_POST['scope'] ) ) : 'all';
+        if ( 'occurrence' === $scope ) {
+            $date = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
+            if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
+                wp_send_json_error( 'Ongeldige datum' );
+            }
+            $exceptions   = array_filter( array_map( 'trim', explode( ',', (string) get_post_meta( $id, '_struijck_exceptions', true ) ) ) );
+            $exceptions[] = $date;
+            $exceptions   = array_values( array_unique( $exceptions ) );
+            sort( $exceptions );
+            update_post_meta( $id, '_struijck_exceptions', implode( ', ', $exceptions ) );
+            wp_send_json_success( array( 'scope' => 'occurrence' ) );
+        }
+
+        // Hele boeking: naar de prullenbak, zodat het altijd terug te halen is.
+        $result = wp_trash_post( $id );
         if ( ! $result ) {
             wp_send_json_error( 'Verwijderen mislukt' );
         }
 
-        wp_send_json_success();
+        wp_send_json_success( array( 'scope' => 'all' ) );
     }
 
     /**
