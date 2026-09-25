@@ -2,6 +2,9 @@
 
 Alle noemenswaardige wijzigingen aan deze plugin. Versienummers volgen [Semver](https://semver.org/lang/nl/).
 
+## [1.18.1] — 2026-09-25
+- **Fix:** de e-mail van een publieke aanvraag had geen antwoordadres, waardoor "Beantwoorden" naar het afzenderadres van de website ging. De mail krijgt nu een `Reply-To` met naam en e-mailadres van de aanvrager.
+
 ## [1.18.0] — 2026-09-21
 - **Nieuw: meerdere zalen per boeking.** In de planner staan de zalen als vinkjes; vink bv. Sporthal én Kantine aan om ze tegelijk te boeken. De conflictcontrole kijkt per zaal, de boeking toont in de planner beide zaalkleuren, en op de website staat ze onder beide zaalfilters.
 

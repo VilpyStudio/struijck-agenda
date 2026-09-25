@@ -170,10 +170,15 @@ class Struijck_Agenda_REST_API {
         if ( empty( $recipients ) ) {
             $recipients[] = get_option( 'admin_email' );
         }
+        // Reply-To op de aanvrager, zodat "Beantwoorden" bij de juiste persoon
+        // uitkomt in plaats van bij het afzenderadres van de website.
+        $headers = array( sprintf( 'Reply-To: %s <%s>', wp_specialchars_decode( $naam, ENT_QUOTES ), $email ) );
+
         wp_mail(
             $recipients,
             'Nieuwe agenda-aanvraag: ' . $naam . ' (' . $date . ')',
-            $body
+            $body,
+            $headers
         );
 
         return new WP_REST_Response( array(
